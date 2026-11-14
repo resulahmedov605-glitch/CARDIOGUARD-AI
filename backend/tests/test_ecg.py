@@ -8,7 +8,7 @@ import wfdb
 from fastapi.testclient import TestClient
 
 from app.main import create_app
-from app.services.ecg import ECGError, ECGService, get_ecg_service
+from app.services.ecg import ECGError, ECGService, get_ecg_service, sample_ceiling
 
 
 @pytest.fixture
@@ -127,3 +127,47 @@ def test_symlinked_data_directory_is_rejected(dataset: Path) -> None:
     link.symlink_to(dataset, target_is_directory=True)
     with pytest.raises(ECGError, match="symlinks"):
         ECGService(link)
+
+
+@pytest.mark.parametrize("fs", [100, 250, 360])
+def test_sample_boundaries_absorb_roundoff_without_moving_off_grid_times(fs):
+    for index in range(0, 650000, 137):
+        boundary = index / fs
+        assert sample_ceiling(boundary, fs) == index
+        assert sample_ceiling(boundary + 1e-9, fs) == index + 1
+        if index:
+            assert sample_ceiling(boundary - 1e-9, fs) == index
+
+
+@pytest.mark.parametrize("fs", [100, 250, 360])
+@pytest.mark.parametrize("duration", [.5, 1])
+def test_decimal_interval_reads_exact_samples(client, dataset, fs, duration):
+    samples = np.arange(2000)
+    wfdb.wrsamp("100", fs=fs, units=["mV", "mV"], sig_name=["A", "B"],
+                d_signal=np.column_stack((samples % 100, samples % 70)),
+                fmt=["212", "212"], adc_gain=[200, 200], baseline=[0, 0], write_dir=str(dataset))
+    response = client.get("/api/v1/ecg/records/100/signal", params={
+        "start_seconds": .55, "duration_seconds": duration,
+    })
+    assert response.status_code == 200
+    signal = response.json()
+    # 0.55 is on the sample grid at 100 and 360 Hz; 250 Hz starts at sample 138.
+    start = {100: 55, 250: 138, 360: 198}[fs]
+    count = round(fs * duration)
+    assert signal["start_sample"] == start
+    assert signal["end_sample_exclusive"] == start + count
+    assert signal["sample_count"] == count
+    expected = wfdb.rdrecord(str(dataset / "100"), sampfrom=start, sampto=start + count, channels=[0])
+    assert signal["amplitudes"] == pytest.approx(expected.p_signal[:, 0])
+
+
+def test_record_end_allows_roundoff_but_rejects_actual_overrun(client):
+    response = client.get("/api/v1/ecg/records/100/signal", params={
+        "start_seconds": 19.9, "duration_seconds": .100000000000001,
+    })
+    assert response.status_code == 200
+    assert response.json()["end_sample_exclusive"] == 2000
+    response = client.get("/api/v1/ecg/records/100/signal", params={
+        "start_seconds": 19.9, "duration_seconds": .100000001,
+    })
+    assert response.status_code == 422

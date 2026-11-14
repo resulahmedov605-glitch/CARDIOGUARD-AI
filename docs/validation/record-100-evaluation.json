@@ -8,7 +8,8 @@
     "preprocessing": {
       "highpass_hz": 0.5,
       "lowpass_hz": 40.0,
-      "order": 3
+      "order": 3,
+      "normalization": "none"
     },
     "detection": {
       "refractory_seconds": 0.25,

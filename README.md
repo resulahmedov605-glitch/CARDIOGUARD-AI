@@ -54,14 +54,26 @@ curl --fail -H 'Content-Type: application/json' \
 Peaks identify both interval and full-record sample indices. Missing/non-finite
 samples are rejected for analysis rather than filled; the raw viewer shows gaps.
 
-Current verification: **91 backend tests**, **34 frontend tests**, successful
-TypeScript/build and live API/proxy checks. Real analysis/visibility controls and
-desktop/393px layouts were checked in Firefox. Repeat the limited reference
+Current verification (2026-11-15): **120 backend tests**, **36 frontend unit tests**,
+**8 real Chromium desktop/mobile tests**, **95% backend application coverage**
+including branches, and successful TypeScript/production build checks.
+The sample-boundary regression is fixed and optional z-score normalization is
+available. See the [Phase 1 closeout](docs/phase-1-closeout.md) for evidence and
+remaining scope limits. Repeat the limited reference
 comparison from `backend/` (requires annotations):
 
 ```bash
 .venv/bin/python -m scripts.evaluate_ecg
+.venv/bin/python -m scripts.evaluate_ecg --full-record
 ```
+
+Choose **Normalization → Z-score** before Run analysis to add a normalized trace.
+It uses the filtered interval's mean and population standard deviation and has
+a separate, dimensionless right-hand axis. Original/filtered amplitudes stay in
+their calibrated units, and peak detection/RR/BPM still use the filtered ECG.
+The API accepts `preprocessing.normalization: "none" | "zscore"` (default `none`)
+and returns `normalized_signal` with amplitudes, offset, scale and units, or null.
+Constant signals produce zero normalized samples with an explicit warning.
 
 See [Sprint 2 algorithms, parameters, results and limitations](docs/sprint-2.md).
 
@@ -70,7 +82,7 @@ See [Sprint 2 algorithms, parameters, results and limitations](docs/sprint-2.md)
 Use the header's sun/moon button to switch light/dark mode. The initial theme
 uses a saved choice or the system preference, and selections are retained in
 browser storage when available. The ECG chart, inputs, cards and notifications
-follow the same theme. Backgrounds and borders transition over 250ms with
+follow the same theme. Backgrounds and borders transition over 280ms with
 ease-in-out timing; text and SVG colors update immediately to avoid delayed
 inherited colors. The system's reduced-motion preference disables the transition.
 Main-area text and controls are larger: form controls
@@ -125,7 +137,7 @@ See [architecture decisions](docs/architecture.md) and the
 ## Requirements
 
 - Node.js **22.12+** (or 20.19+) and npm.
-- Python **3.11+** with `venv` and `pip`.
+- Python **3.13** with `venv` and `pip` for the tested locked environment.
 - Internet for initial dependency installation and the explicit dataset download.
   After setup, no cloud service or external API call is needed.
 
@@ -139,7 +151,7 @@ second project folder inside it.
 ```bash
 cd backend
 python3 -m venv .venv
-.venv/bin/python -m pip install --cache-dir ../.cache/pip -r requirements-dev.txt
+.venv/bin/python -m pip install --cache-dir ../.cache/pip -r requirements-dev.lock
 .venv/bin/python -m scripts.download_mitbih
 .venv/bin/python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
 ```
@@ -149,6 +161,9 @@ its full waveform checksum, and writes a source/hash manifest. Download or
 verification failure does not replace existing files or generate substitute
 ECG data. Rerun the command to repair a damaged download. API requests never
 download files.
+Publication errors restore files already replaced. Stop the backend while
+refreshing a dataset: the file set is not a single atomic transaction for
+concurrent readers, and rollback cannot guarantee recovery after power/disk loss.
 
 Backend health: <http://127.0.0.1:8000/api/v1/health> → `{"status":"ok"}`.
 
@@ -207,6 +222,7 @@ details. Downloaded files and generated manifests are ignored by Git.
 | `GET /api/v1/ecg/records` | `records` metadata array and `unavailable_records` with reasons |
 | `GET /api/v1/ecg/records/100` | ID, frequency, channel indices/names/units, sample count, duration |
 | `GET /api/v1/ecg/records/100/signal` | Selected channel, interval/sample bounds, timestamps, amplitudes |
+| `POST /api/v1/ecg/analyze` | Original/filtered signals, optional normalization, peaks, RR/BPM and optional references |
 
 | Signal query parameter | Default | Validation |
 | --- | --- | --- |
@@ -218,6 +234,10 @@ The interval must fit inside the record. Samples belong to `[start, start +
 duration)`; timestamps are absolute seconds from record start, aligned to its
 sampling grid. Responses include requested and actual bounds. WFDB missing
 amplitudes become JSON `null` and chart gaps, never zeroes.
+Values within eight floating-point ULPs of a sample boundary snap to that
+boundary before ceiling; genuine off-grid times keep the half-open semantics.
+For example, start 0.55 s and duration 0.5 s at 360 Hz returns samples 198–377
+(180 samples) and can be analyzed successfully.
 
 ```bash
 curl --fail 'http://127.0.0.1:8000/api/v1/ecg/records/100/signal?channel=1&start_seconds=5&duration_seconds=2'
@@ -235,6 +255,8 @@ From `backend/`:
 
 ```bash
 .venv/bin/python -m pytest
+.venv/bin/python -m coverage run -m pytest
+.venv/bin/python -m coverage report
 .venv/bin/python -m pip --cache-dir ../.cache/pip check
 ```
 
@@ -244,7 +266,12 @@ metadata, both channels, sample/time alignment, invalid IDs/ranges, missing and
 corrupt files, and unsafe paths. A separate real-data test compares the API with
 WFDB for local record 100; it skips if no dataset is installed. With record 100
 present, the Sprint 1 baseline was **31 passed**. The current Sprint 2 suite has
-**91 passing tests**, including processing, analysis API and verified-download tests.
+**120 passing tests**, including sample-boundary regressions, normalization,
+processing, analysis API and downloader publication rollback. Application coverage
+is 95% including branches; the configured minimum is 90%. This percentage covers
+`backend/app`, not the downloader scripts or frontend. `requirements-dev.lock`
+pins the tested Python 3.13 environment, including transitive dependencies;
+`requirements*.txt` retain the direct dependency declarations.
 
 From `frontend/`:
 
@@ -255,17 +282,27 @@ npm run build
 npm run preview
 ```
 
-The original **7 frontend tests** cover rendering, selectors, interval requests, loading,
-missing data, errors/retry, and stale-request protection. They mock the chart
-component; actual Plotly rendering, zoom, pan, reset, and a 393px responsive
-layout were checked separately in Chrome. Sprint 2 adds seven tests for analysis
-submission, errors, insufficient data, cutoff validation and trace/marker toggles
-(**14 total**), plus real Firefox desktop and 393px analysis checks. Undefined
-reference metrics display **Insufficient data** without a misleading percent suffix.
-Appearance/feedback work adds ten tests for theme persistence/system preference,
-storage failure, chart palette changes, toast updates/dismissal/retry,
-request cancellation and quiet health polling. The quieter notification policy
-adds a silent-resource regression check (**25 frontend tests total**).
+The **36 unit tests** cover requests, selectors, invalid intervals/cutoffs,
+loading/errors/retry, cancellation, chart trace bindings/visibility, normalization
+units, themes, sidebar controls and notifications. Plotly is mocked in unit tests.
+The separate **8 browser tests** render real Plotly and call the real backend:
+
+```bash
+npm run test:e2e:install
+npm run test:e2e
+```
+
+Install/download record 100 before the browser suite. It starts dedicated backend
+18000 and Vite 15173 processes and stops them afterward; existing development
+servers are left alone. Four scenarios run at desktop 1440×1000 and mobile
+393×852: real analysis/normalization and the minimum interval; zoom/pan/reset/
+hover; API-error retry; theme persistence and desktop sidebar drag/collapse.
+Mobile uses Chromium emulation, not a physical device. Browser binaries and
+reports stay local and are ignored by Git. On Windows or with a custom interpreter,
+set `CARDIOGUARD_PYTHON` to its executable path.
+
+`.github/workflows/ci.yml` runs the same checks after a verified dataset download.
+It is prepared for a future remote repository; no hosted CI result is claimed.
 
 `build` includes strict TypeScript checks and writes `frontend/dist/`. It passes
 with a size warning for the lazy Plotly basic chunk (about 1.17 MB / 387 kB gzip).
@@ -362,4 +399,5 @@ CARDIOGUARD AI/
   environment permission. Shell HTTP clients may need to bypass a system proxy
   for `127.0.0.1`, for example with `curl --noproxy '*'`.
 
-No remote repository or deployment has been configured or pushed.
+The local repository has baseline commit `e4ff588` for the pre-fix Sprint 1–2
+state. No remote repository or deployment has been configured or pushed.

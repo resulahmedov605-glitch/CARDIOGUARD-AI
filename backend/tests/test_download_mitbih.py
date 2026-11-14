@@ -65,3 +65,46 @@ def test_download_failure_preserves_existing_record(monkeypatch, tmp_path: Path)
     assert (tmp_path / "100.hea").read_bytes() == b"existing header"
     assert (tmp_path / "100.dat").read_bytes() == b"existing waveform"
     assert not list(tmp_path.glob(".download-*"))
+
+
+@pytest.mark.parametrize("existing", [False, True])
+def test_install_failure_rolls_back_published_files(monkeypatch, tmp_path, existing):
+    staging, destination = tmp_path / 'staging', tmp_path / 'destination'
+    staging.mkdir()
+    destination.mkdir()
+    names = ['100.hea', '100.dat', '100.source.json']
+    for name in names:
+        (staging / name).write_bytes(b'new')
+        if existing:
+            (destination / name).write_bytes(b'previous')
+    replace = Path.replace
+
+    def fail_during_install(path, target):
+        if path == staging / '100.dat':
+            raise OSError('Simulated filesystem replacement failure')
+        return replace(path, target)
+
+    monkeypatch.setattr(Path, 'replace', fail_during_install)
+    with pytest.raises(OSError, match='replacement failure'):
+        downloader.install_verified_files(staging, destination, names)
+    for name in names:
+        if existing:
+            assert (destination / name).read_bytes() == b'previous'
+        else:
+            assert not (destination / name).exists()
+
+
+def test_install_rejects_symlink_targets_before_replacing_any_files(tmp_path):
+    staging, destination = tmp_path / 'staging', tmp_path / 'destination'
+    staging.mkdir()
+    destination.mkdir()
+    (staging / '100.hea').write_bytes(b'new header')
+    (staging / '100.dat').write_bytes(b'new waveform')
+    (destination / '100.hea').write_bytes(b'previous header')
+    protected = tmp_path / 'protected'
+    protected.write_bytes(b'protected')
+    (destination / '100.dat').symlink_to(protected)
+    with pytest.raises(ValueError, match='regular files'):
+        downloader.install_verified_files(staging, destination, ['100.hea', '100.dat'])
+    assert (destination / '100.hea').read_bytes() == b'previous header'
+    assert protected.read_bytes() == b'protected'

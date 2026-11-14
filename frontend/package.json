@@ -5,6 +5,8 @@
   "type": "module",
   "scripts": {
     "test": "vitest run",
+    "test:e2e": "node scripts/playwright.mjs test",
+    "test:e2e:install": "node scripts/playwright.mjs install chromium",
     "dev": "vite",
     "build": "tsc -b && vite build",
     "typecheck": "tsc -b",
@@ -23,6 +25,7 @@
     "react-plotly.js": "4.1.0"
   },
   "devDependencies": {
+    "@playwright/test": "1.65.1",
     "@tailwindcss/vite": "4.3.5",
     "@testing-library/react": "16.3.3",
     "@types/node": "26.6.6",

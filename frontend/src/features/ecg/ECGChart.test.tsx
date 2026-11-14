@@ -15,7 +15,7 @@ vi.mock('react-plotly.js/factory', async () => {
  }) {
   const element = useRef<HTMLDivElement>(null)
   useEffect(() => { if (element.current) onInitialized?.({}, element.current) }, [])
-  return <div ref={element} data-testid="plot-traces" data-background={layout.paper_bgcolor}>{JSON.stringify(data)}</div>
+  return <div ref={element} data-testid="plot-traces" data-background={layout.paper_bgcolor} data-secondary-axis={JSON.stringify(layout.yaxis2)}>{JSON.stringify(data)}</div>
  } }
 })
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); vi.clearAllMocks() })
@@ -40,6 +40,24 @@ test('raw Sprint 1 rendering remains available before analysis',()=>{
  render(<ECGChart signal={signalFixture} />)
  expect(JSON.parse(screen.getByTestId('plot-traces').textContent!)).toHaveLength(1)
  expect(screen.queryByLabelText('Filtered ECG')).toBeNull()
+})
+
+test('normalized samples use a separate dimensionless axis and visibility control', () => {
+ const amplitudes = signalFixture.amplitudes.map((value) => (value ?? 0) * 2)
+ render(<ECGChart signal={signalFixture} analysis={{ ...analysisFixture,
+  normalized_signal: { method: 'zscore', units: 'dimensionless', offset: 0, scale: .5, amplitudes },
+ }} />)
+ const plot = screen.getByTestId('plot-traces')
+ const traces = () => JSON.parse(plot.textContent!)
+ expect(traces()[3].y).toEqual(amplitudes)
+ expect(traces()[3].x).toEqual(signalFixture.timestamps_seconds)
+ expect(traces()[3].yaxis).toBe('y2')
+ expect(traces()[3].hovertemplate).toContain('dimensionless')
+ expect(JSON.parse(plot.getAttribute('data-secondary-axis')!).title.text).toBe('Z-score (dimensionless)')
+ fireEvent.click(screen.getByLabelText('Normalized ECG (z-score)'))
+ expect(traces()).toHaveLength(3)
+ expect(traces()[0].y).toEqual(signalFixture.amplitudes)
+ expect(JSON.parse(plot.getAttribute('data-secondary-axis')!).visible).toBe(false)
 })
 
 test('chart palette follows theme changes without discarding trace visibility', () => {

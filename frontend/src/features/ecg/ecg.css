@@ -73,6 +73,7 @@
   .ecg-analysis-title { @apply mb-4 flex flex-wrap items-center gap-3 text-[15px]; }
   .ecg-analysis-title > span { @apply text-[13px] text-muted; }
   .ecg-processing-grid { @apply grid grid-cols-4 items-end gap-4; }
+  .ecg-main-processing { grid-template-columns: repeat(5, minmax(0, 1fr)); }
   .ecg-processing-grid > label { @apply flex min-w-0 flex-col gap-2 text-[14px] text-muted-strong; }
   .ecg-filter-field, .ecg-filter-field > label { @apply flex min-w-0 flex-col gap-2 text-[14px] text-muted-strong; }
   .ecg-filter-field > label:first-child { @apply flex-row items-center; }

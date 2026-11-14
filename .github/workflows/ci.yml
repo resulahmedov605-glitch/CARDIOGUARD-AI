@@ -1,0 +1,51 @@
+name: Phase 1 checks
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      PLAYWRIGHT_BROWSERS_PATH: ${{ github.workspace }}/.cache/playwright
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install tested backend dependencies
+        working-directory: backend
+        run: |
+          python -m venv .venv
+          .venv/bin/python -m pip install -r requirements-dev.lock
+          .venv/bin/python -m pip check
+      - name: Download and verify real ECG and reference annotations
+        working-directory: backend
+        run: .venv/bin/python -m scripts.download_mitbih --annotations
+      - name: Backend tests and coverage gate
+        working-directory: backend
+        run: |
+          .venv/bin/python -m coverage run -m pytest
+          .venv/bin/python -m coverage report
+      - name: Frontend tests and production build
+        working-directory: frontend
+        run: |
+          npm ci
+          npm test
+          npm run build
+          npx playwright install --with-deps chromium
+      - name: Real desktop and mobile browser tests
+        working-directory: frontend
+        run: npm run test:e2e

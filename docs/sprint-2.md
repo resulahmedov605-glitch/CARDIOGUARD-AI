@@ -1,5 +1,10 @@
 # Sprint 2 — signal processing and heartbeat analysis
 
+The original verification tables below record the 2026-11-12 implementation.
+The [2026-11-15 Phase 1 closeout](phase-1-closeout.md) supersedes their test totals
+and acceptance status, and adds normalization, sample-boundary fixes, browser
+automation, coverage and full-record evaluation.
+
 Implemented and verified on **2026-11-12**, inside the existing workspace.
 CARDIOGUARD AI is an educational/research prototype, **not a clinically validated
 diagnostic system**. No Sprint 3, ML, 3D, Algorithms Lab or persistence work began.
@@ -30,11 +35,19 @@ The specified cutoff has approximately -6 dB composite gain, not -3 dB.
 
 High-pass reduction targets slow baseline drift; low-pass reduction targets
 high-frequency noise. These defaults suit exploratory QRS viewing, not diagnostic
-ST/morphology measurements. There is no notch, normalization or resampling.
+ST/morphology measurements. There is no notch or resampling.
 SciPy's default odd padding is retained; inputs too short for padding are rejected.
 No hidden padding reduction or invented samples are returned. Only the selected
 window is read, so boundaries and windows short relative to the high-pass time
 scale can be distorted. Warnings identify these limitations.
+
+Optional `preprocessing.normalization="zscore"` now produces a separate
+`normalized_signal`: `(filtered - mean(filtered)) / std(filtered, ddof=0)`.
+The computation is scaled internally to avoid overflow for finite large values.
+Offset/scale preserve the input units; the output is dimensionless and uses a
+separate chart axis. Zero standard deviation yields zeros with a warning.
+Original/filtered samples and peak/RR/BPM results remain unchanged. Default is
+`"none"`, which returns null for `normalized_signal`.
 
 ## Peak detection
 
@@ -92,6 +105,7 @@ timestamp and processed amplitude. Reference positions are separate fields.
 | `preprocessing.highpass_hz` | 0.5 | null or 0.05–10 Hz |
 | `preprocessing.lowpass_hz` | 40 | null or 10–150 Hz |
 | `preprocessing.order` | 3 | Integer 1–6 |
+| `preprocessing.normalization` | `none` | `none` or `zscore` |
 | `detection.refractory_seconds` | 0.25 | 0.2–1 |
 | `detection.integration_seconds` | 0.12 | 0.04–0.2 |
 | `detection.threshold_scale` | 0.35 | 0.05–2 |
@@ -166,7 +180,8 @@ the application handler now converts non-finite error inputs to strings and retu
 422. Three regression cases and a live proxy request verified this fix.
 The final run is green. No required command remains blocked.
 
-All Sprint 2 functional acceptance criteria are met. Browser emulation is not a
+The original Sprint 2 acceptance result was later supplemented by the audit and
+fixes linked above; use that closeout for current status. Browser emulation is not a
 physical-device test. The default Plotly lazy chunk remains approximately 1.17 MB
 (388 kB gzip) and triggers Vite's size warning. No clinical validation is claimed.
 

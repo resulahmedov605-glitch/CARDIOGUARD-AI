@@ -18,6 +18,10 @@ The command stages the files, validates the header and
 full waveform checksum with WFDB, and writes `100.source.json` with source,
 license, metadata, and SHA-256 hashes. Downloads have a 30-second timeout per file;
 failures leave existing files untouched and never produce substitute ECG data.
+If publication fails after a file is replaced, the downloader restores the
+previous file set (or removes files introduced by that failed installation).
+Stop the backend while refreshing files; the batch is not atomic to concurrent
+readers and cannot guarantee rollback through power loss or persistent disk errors.
 
 HTTPS downloads verify certificates and hostnames. The downloader supplements
 Python's default CA store with `certifi`, avoiding the missing-CA-file issue in

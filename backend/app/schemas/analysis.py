@@ -1,3 +1,5 @@
+from typing import Literal
+
 from pydantic import BaseModel, ConfigDict, Field
 
 from app.schemas.ecg import ECGRecordMetadata, ECGSignalResponse
@@ -11,6 +13,7 @@ class PreprocessingParameters(StrictParameters):
     highpass_hz: float | None = Field(default=.5, ge=.05, le=10)
     lowpass_hz: float | None = Field(default=40., ge=10, le=150)
     order: int = Field(default=3, ge=1, le=6, strict=True)
+    normalization: Literal["none", "zscore"] = "none"
 
 
 class DetectionParameters(StrictParameters):
@@ -64,11 +67,20 @@ class ReferenceComparison(BaseModel):
     tolerance_seconds: float
 
 
+class NormalizedSignal(BaseModel):
+    method: Literal["zscore"] = "zscore"
+    units: Literal["dimensionless"] = "dimensionless"
+    offset: float
+    scale: float
+    amplitudes: list[float]
+
+
 class AnalysisResponse(BaseModel):
     record: ECGRecordMetadata
     parameters: AnalysisRequest
     original_signal: ECGSignalResponse
     filtered_amplitudes: list[float]
+    normalized_signal: NormalizedSignal | None
     detected_peaks: list[DetectedPeak]
     statistics: HeartRateStatistics
     reference_comparison: ReferenceComparison | None

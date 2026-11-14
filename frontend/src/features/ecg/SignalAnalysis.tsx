@@ -15,6 +15,7 @@ export function SignalAnalysis({ signal }: { signal: ECGSignalResponse }) {
   const [baseline, setBaseline] = useState(true)
   const [noise, setNoise] = useState(true)
   const [order, setOrder] = useState('3')
+  const [normalization, setNormalization] = useState<'none' | 'zscore'>('none')
   const [refractory, setRefractory] = useState('0.25')
   const [threshold, setThreshold] = useState('0.35')
   const [body, setBody] = useState<string | undefined>()
@@ -41,7 +42,7 @@ export function SignalAnalysis({ signal }: { signal: ECGSignalResponse }) {
     const request: AnalysisRequest = {
       record_id: signal.record_id, channel: signal.channel.index,
       start_seconds: signal.requested_start_seconds, duration_seconds: signal.requested_duration_seconds,
-      preprocessing: { highpass_hz: high, lowpass_hz: low, order: Number(order) },
+      preprocessing: { highpass_hz: high, lowpass_hz: low, order: Number(order), normalization },
       detection: { refractory_seconds: Number(refractory), threshold_scale: Number(threshold) },
     }
     const next = JSON.stringify(request)
@@ -54,12 +55,13 @@ export function SignalAnalysis({ signal }: { signal: ECGSignalResponse }) {
     <>
       <form className="ecg-analysis-controls" aria-label="ECG analysis controls" onSubmit={run}>
         <div className="ecg-analysis-title"><Icon name="settings" width={20} height={20} /><strong>Signal processing</strong><span>Run on the displayed channel and interval</span></div>
-        <div className="ecg-processing-grid">
+        <div className="ecg-processing-grid ecg-main-processing">
           <div className="ecg-filter-field"><label><input type="checkbox" checked={baseline} onChange={(e) => setBaseline(e.target.checked)} /> Baseline reduction</label>
             <label>High-pass (Hz)<input type="number" step="any" min="0.05" max="10" required disabled={!baseline} value={highpass} onChange={(e) => setHighpass(e.target.value)} /></label></div>
           <div className="ecg-filter-field"><label><input type="checkbox" checked={noise} onChange={(e) => setNoise(e.target.checked)} /> Noise reduction</label>
             <label>Low-pass (Hz)<input type="number" step="any" min="10" max="150" required disabled={!noise} value={lowpass} onChange={(e) => setLowpass(e.target.value)} /></label></div>
           <label>Filter order<select value={order} onChange={(e) => setOrder(e.target.value)}>{[1, 2, 3, 4, 5, 6].map((value) => <option key={value}>{value}</option>)}</select></label>
+          <label>Normalization<select value={normalization} onChange={(e) => setNormalization(e.target.value as 'none' | 'zscore')}><option value="none">Off</option><option value="zscore">Z-score</option></select></label>
           <button type="submit" className="primary-button" disabled={result.loading}><Icon name={result.loading ? 'loading' : 'play'} width={18} height={18} className={result.loading ? 'animate-spin' : undefined} />{result.loading ? 'Analyzing…' : 'Run analysis'}</button>
         </div>
         <details className="ecg-detection-settings"><summary>Peak detection settings</summary><div className="ecg-processing-grid">
@@ -76,6 +78,7 @@ export function SignalAnalysis({ signal }: { signal: ECGSignalResponse }) {
       </Suspense>
       {data && <>
         <p className="ecg-analysis-notice">Applied: high-pass {data.parameters.preprocessing.highpass_hz ?? 'off'} Hz · low-pass {data.parameters.preprocessing.lowpass_hz ?? 'off'} Hz · order {data.parameters.preprocessing.order}. Peaks are algorithm-generated QRS candidates.</p>
+        {data.normalized_signal && <p className="ecg-analysis-notice">Z-score normalization uses the filtered interval's mean and population standard deviation. Its right-hand axis is dimensionless; original and filtered ECG retain {signal.channel.units ?? 'their original units'}. Peak detection and BPM use the filtered ECG.</p>}
         <dl className="ecg-statistics" aria-label="Estimated heartbeat statistics">
           <div><dt><Icon name="pulse" width={17} height={17} />Estimated average BPM</dt><dd>{numberOrMissing(data.statistics.average_bpm, 1)}</dd></div>
           <div><dt><Icon name="ecg" width={17} height={17} />Detected peaks</dt><dd>{data.statistics.peak_count}</dd></div>

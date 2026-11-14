@@ -19,6 +19,19 @@ MAX_DURATION_SECONDS = 30
 DOWNLOAD_HINT = "Run 'python -m scripts.download_mitbih' from backend/."
 
 
+def sample_ceiling(seconds: float, fs: float) -> int:
+    """Ceil onto the sample grid, absorbing only floating-point round-off.
+
+    Decimal boundaries such as 0.55 * 360 can land a few ULPs above an
+    integer. A fixed time epsilon would also move genuine off-grid requests;
+    use a tolerance proportional to the representable precision instead.
+    """
+    position = seconds * fs
+    nearest = round(position)
+    tolerance = 8 * max(math.ulp(position), math.ulp(seconds) * fs)
+    return nearest if abs(position - nearest) <= tolerance else math.ceil(position)
+
+
 class ECGError(Exception):
     def __init__(self, status_code: int, message: str) -> None:
         super().__init__(message)
@@ -120,11 +133,14 @@ class ECGService:
                 or start_seconds < 0 or not 0 < duration_seconds <= MAX_DURATION_SECONDS):
             raise ECGError(422, "Start must be nonnegative; duration must be greater than 0 and at most 30 seconds.")
         end_seconds = start_seconds + duration_seconds
-        if end_seconds > metadata.duration_seconds:
+        if end_seconds > metadata.duration_seconds and not math.isclose(
+            end_seconds, metadata.duration_seconds, rel_tol=0,
+            abs_tol=8 * math.ulp(metadata.duration_seconds),
+        ):
             raise ECGError(422, "The requested interval extends beyond the end of the record.")
         fs = metadata.sampling_frequency_hz
-        start = math.ceil(start_seconds * fs)
-        end = min(math.ceil(end_seconds * fs), metadata.sample_count)
+        start = sample_ceiling(start_seconds, fs)
+        end = min(sample_ceiling(end_seconds, fs), metadata.sample_count)
         if start >= end:
             raise ECGError(422, "The selected interval contains no samples at this sampling frequency.")
         try:

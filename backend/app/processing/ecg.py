@@ -95,6 +95,22 @@ def detect_peaks(values: ArrayLike, fs: float, config: DetectionConfig = Detecti
     return np.asarray(sorted(selected), dtype=np.int64)
 
 
+def normalize(values: ArrayLike, fs: float) -> tuple[NDArray[np.float64], float, float]:
+    """Population z-score of a copy; flat signals map to zero without division.
+
+    Scale before computing moments to avoid overflow for finite large inputs.
+    Returned offset and scale retain the input's physical units. The normalized
+    samples are dimensionless and never replace the calibrated waveform.
+    """
+    signal = validate_signal(values, fs)
+    magnitude = float(np.max(np.abs(signal)))
+    scaled = signal / magnitude if magnitude else signal
+    offset = float(np.mean(scaled))
+    scale = float(np.std(scaled, ddof=0))
+    output = (scaled - offset) / scale if scale else np.zeros_like(signal)
+    return output, offset * magnitude, scale * magnitude
+
+
 def rr_statistics(peaks: ArrayLike, fs: float) -> dict:
     if not math.isfinite(fs) or fs <= 0:
         raise ValueError("Sampling frequency must be finite and positive.")

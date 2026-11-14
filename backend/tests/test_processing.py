@@ -1,7 +1,7 @@
 """Controlled numerical test signals only; not application or patient data."""
 import numpy as np
 import pytest
-from app.processing.ecg import FilterConfig, DetectionConfig, preprocess, detect_peaks, rr_statistics, compare_peaks
+from app.processing.ecg import FilterConfig, DetectionConfig, preprocess, detect_peaks, rr_statistics, compare_peaks, normalize
 
 
 @pytest.mark.parametrize('fs', [250, 360])
@@ -92,3 +92,34 @@ def test_reference_matching_is_one_to_one_and_has_configurable_tolerance():
     assert compare_peaks([100],[110],100,.1)['true_positives']==1
     assert compare_peaks([100],[110],100,.09)['true_positives']==0
     assert compare_peaks([],[],100)['sensitivity'] is None
+
+
+def test_normalization_has_zero_mean_unit_population_variance_and_preserves_input():
+    values = np.array([1., 2., 3., 6.])
+    saved = values.copy()
+    result, offset, scale = normalize(values, 360)
+    assert np.mean(result) == pytest.approx(0, abs=1e-14)
+    assert np.std(result, ddof=0) == pytest.approx(1)
+    assert offset == pytest.approx(np.mean(values))
+    assert scale == pytest.approx(np.std(values, ddof=0))
+    assert result * scale + offset == pytest.approx(values)
+    assert np.array_equal(values, saved) and not np.shares_memory(result, values)
+
+
+@pytest.mark.parametrize("value", [0., 3., -5.])
+def test_constant_normalization_is_finite_and_zero(value):
+    result, offset, scale = normalize(np.full(180, value), 360)
+    assert np.array_equal(result, np.zeros(180))
+    assert offset == value and scale == 0
+
+
+def test_normalization_handles_large_finite_values_without_overflow():
+    result, offset, scale = normalize([-1e308, 0, 1e308], 360)
+    assert np.isfinite(result).all() and np.isfinite(offset) and np.isfinite(scale)
+    assert np.std(result) == pytest.approx(1)
+
+
+@pytest.mark.parametrize("values", [[], [1, np.nan], [1, np.inf], [[1, 2]]])
+def test_normalization_rejects_invalid_samples(values):
+    with pytest.raises(ValueError):
+        normalize(values, 360)

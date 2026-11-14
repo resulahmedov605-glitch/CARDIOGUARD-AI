@@ -5,7 +5,7 @@ export interface AnalysisRequest {
   channel: number
   start_seconds: number
   duration_seconds: number
-  preprocessing: { highpass_hz: number | null; lowpass_hz: number | null; order: number }
+  preprocessing: { highpass_hz: number | null; lowpass_hz: number | null; order: number; normalization: 'none' | 'zscore' }
   detection: { refractory_seconds: number; threshold_scale: number }
 }
 
@@ -14,6 +14,7 @@ export interface ECGAnalysis {
   parameters: AnalysisRequest
   original_signal: ECGSignalResponse
   filtered_amplitudes: number[]
+  normalized_signal: { method: 'zscore'; units: 'dimensionless'; offset: number; scale: number; amplitudes: number[] } | null
   detected_peaks: { interval_sample_index: number; record_sample_index: number; timestamp_seconds: number; filtered_amplitude: number }[]
   statistics: {
     peak_count: number; valid_interval_count: number

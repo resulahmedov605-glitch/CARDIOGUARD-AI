@@ -13,8 +13,8 @@ export function Overview(health: ReturnType<typeof useHealth>) {
           <p>Explore the heart. Understand the intelligence behind it.</p>
         </div>
         <span className="sprint-badge">
-          <Icon name="layers" width={16} height={16} className="text-primary" />Sprint 01
-          <span className="text-faint">/</span>Foundation
+          <Icon name="layers" width={16} height={16} className="text-primary" />Phase 01
+          <span className="text-faint">/</span>ECG analysis
         </span>
       </div>
 

@@ -105,6 +105,15 @@ reader allows only the registered record's optional local `.atr` file, rejects
 symlinks, and excludes non-beat markers. Reference absence/corruption degrades
 comparison only and never supplies algorithmic peaks.
 
+Optional z-score normalization is a separate derivative of the filtered interval.
+`normalized_signal` includes the method, dimensionless units, physical offset/
+scale and aligned amplitudes. It never replaces original/filtered amplitudes or
+feeds the peak detector. The UI gives it a separately labeled right-hand axis.
+
+`sample_ceiling` snaps only representational round-off near integer sample indices
+(eight ULPs) before applying ceiling. It preserves actual off-grid requests and
+the `[start, end)` contract, including intervals at the end of the record.
+
 `SignalAnalysis` submits POST only on Run/Retry. Its component is reset on a new
 channel/interval. The shared request hook keys responses by URL and serialized
 body, cancels old requests, hides stale estimates, and explains validation errors.

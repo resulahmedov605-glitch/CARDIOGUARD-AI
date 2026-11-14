@@ -71,3 +71,18 @@ test('undefined reference metrics display insufficient data without a percentage
   expect(await screen.findByText(/Selected-interval sensitivity: Insufficient data · positive predictivity: 0.0%/)).toBeTruthy()
   expect(screen.queryByText(/Insufficient data%/)).toBeNull()
 })
+
+test('normalization is submitted explicitly and explains its separate units', async () => {
+  const fetcher = vi.fn(async () => Response.json({ ...analysisFixture,
+    normalized_signal: { method: 'zscore', units: 'dimensionless', offset: 0, scale: 1,
+      amplitudes: analysisFixture.filtered_amplitudes },
+  }))
+  vi.stubGlobal('fetch', fetcher)
+  render(<SignalAnalysis signal={signalFixture} />)
+  fireEvent.change(screen.getByLabelText('Normalization'), { target: { value: 'zscore' } })
+  expect(fetcher).not.toHaveBeenCalled()
+  fireEvent.click(screen.getByRole('button', { name: 'Run analysis' }))
+  expect(await screen.findByText(/right-hand axis is dimensionless/)).toBeTruthy()
+  const [, options] = fetcher.mock.calls[0] as unknown as [string, RequestInit]
+  expect(JSON.parse(options.body as string).preprocessing.normalization).toBe('zscore')
+})

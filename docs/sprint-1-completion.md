@@ -1,5 +1,9 @@
 # Sprint 1 completion — ECG integration and viewer
 
+Historical report for 2026-11-11. Statements about Sprint 2 not being started
+describe that date only. Current fixes and verification are recorded in the
+[2026-11-15 Phase 1 closeout](phase-1-closeout.md).
+
 Validated on **2026-11-11**, with Node.js 24.11.1 and Python 3.13.5, inside the
 existing `CARDIOGUARD AI` workspace. Sprint 2 has not been started.
 

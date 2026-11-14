@@ -1,5 +1,10 @@
 # Appearance and feedback
 
+Current browser automation (2026-11-15) covers desktop sidebar dragging,
+collapse/expand and persistence, light/dark chart updates, and a 393px layout.
+The older browser-control limitations below are historical. See
+[Phase 1 closeout](phase-1-closeout.md) for the current verification.
+
 Implemented and checked on **2026-11-13**, following Sprint 2. No new analysis
 algorithms or later-sprint functionality were introduced.
 
@@ -9,7 +14,7 @@ algorithms or later-sprint functionality were introduced.
 system preference. An early script in `index.html` applies it before the app
 loads to avoid a light flash. Browser storage failures do not disable switching.
 The header sun/moon button changes the application and chart together.
-Surfaces, borders, outlines and shadows use the existing 250ms ease-in-out
+Surfaces, borders, outlines and shadows use the existing 280ms ease-in-out
 transition. Text and SVG fill/stroke colors update immediately: transitioning
 `color` on every ancestor and descendant delayed inherited text colors during
 theme changes. Card/link hover movement is preserved without a text-color

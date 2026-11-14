@@ -9,6 +9,7 @@ import ssl
 import tempfile
 from urllib.request import urlopen
 from shutil import copyfileobj
+from shutil import copyfile
 
 import wfdb
 import certifi
@@ -24,6 +25,36 @@ def download_ssl_context() -> ssl.SSLContext:
     if "SSL_CERT_FILE" not in os.environ and "SSL_CERT_DIR" not in os.environ:
         context.load_verify_locations(cafile=certifi.where())
     return context
+
+
+def install_verified_files(directory: Path, destination: Path, names: list[str]) -> None:
+    """Roll back already-published files if any filesystem replacement fails.
+
+    Each replacement is atomic on this filesystem. The batch can be observed
+    between replacements, so stop readers for a dataset refresh. This protects
+    recoverable installation errors, not power loss or an unrecoverable disk.
+    """
+    backup = directory / "previous"
+    backup.mkdir()
+    for name in names:
+        target = destination / name
+        if target.is_symlink() or (target.exists() and not target.is_file()):
+            raise ValueError("Existing dataset targets must be regular files.")
+        if target.is_file():
+            copyfile(target, backup / name)
+    installed = []
+    try:
+        for name in names:
+            (directory / name).replace(destination / name)
+            installed.append(name)
+    except OSError:
+        for name in reversed(installed):
+            previous = backup / name
+            if previous.is_file():
+                previous.replace(destination / name)
+            else:
+                (destination / name).unlink()
+        raise
 
 
 def download(record_id: str, annotations: bool = False) -> None:
@@ -61,11 +92,11 @@ def download(record_id: str, annotations: bool = False) -> None:
             "sha256": {name: hashlib.sha256((directory / name).read_bytes()).hexdigest()
                        for name in files},
         }
-        for name in files:
-            (directory / name).replace(DATA_DIRECTORY / name)
-        (DATA_DIRECTORY / f"{record_id}.source.json").write_text(
+        manifest_name = f"{record_id}.source.json"
+        (directory / manifest_name).write_text(
             json.dumps(manifest, indent=2) + "\n", encoding="utf-8"
         )
+        install_verified_files(directory, DATA_DIRECTORY, [*files, manifest_name])
         print(f"Verified record {record_id}: {metadata.sample_count} samples, "
               f"{metadata.sampling_frequency_hz:g} Hz, "
               f"{', '.join(channel.name for channel in metadata.channels)}")
