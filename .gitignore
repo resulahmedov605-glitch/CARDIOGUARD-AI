@@ -1,0 +1,42 @@
+# Local configuration
+.env
+.env.*
+!.env.example
+.DS_Store
+*.log
+.cache/
+
+# Frontend
+node_modules/
+dist/
+*.tsbuildinfo
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+*.egg-info/
+
+# Local research assets and SQLite databases
+data/mitbih/*
+!data/mitbih/.gitkeep
+datasets/raw/*
+!datasets/raw/.gitkeep
+datasets/processed/*
+!datasets/processed/.gitkeep
+models/*
+!models/README.md
+!models/.gitkeep
+storage/*
+!storage/README.md
+!storage/.gitkeep
+*.db
+*.db-*
+*.sqlite
+*.sqlite3
+*.sqlite3-*

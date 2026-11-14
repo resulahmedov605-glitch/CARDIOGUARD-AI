@@ -1,0 +1,30 @@
+import {
+  Activity, ArrowRight, BookOpen, Brain, Check, ChevronRight, CircleAlert,
+  CircleCheck, Clock3, CodeXml, Database, ExternalLink, FlaskConical, Folder,
+  Hand, Heart, HeartPulse, Info, Layers, LayoutDashboard, ListChecks, LoaderCircle,
+  Monitor, Moon, PanelLeftClose, PanelLeftOpen, Play, RotateCcw, RotateCw, Search, Server, ShieldCheck,
+  SlidersHorizontal, Sun, Timer, TriangleAlert, Wifi, WifiOff, Workflow, X,
+} from 'lucide-react'
+import type { LucideProps } from 'lucide-react'
+
+// Static imports keep the icon set small and preserve the existing component API.
+const icons = {
+  overview: LayoutDashboard, ecg: Activity, brain: Brain, heart: Heart,
+  algorithm: Workflow, arrow: ArrowRight, chevron: ChevronRight,
+  shield: ShieldCheck, database: Database, server: Server, check: Check,
+  refresh: RotateCw, book: BookOpen, code: CodeXml, folder: Folder,
+  moon: Moon, sun: Sun, success: CircleCheck, error: CircleAlert,
+  warning: TriangleAlert, info: Info, loading: LoaderCircle, close: X,
+  play: Play, zoom: Search, pan: Hand, reset: RotateCcw, settings: SlidersHorizontal,
+  clock: Clock3, timer: Timer, list: ListChecks, monitor: Monitor,
+  external: ExternalLink, layers: Layers, lab: FlaskConical, pulse: HeartPulse,
+  online: Wifi, offline: WifiOff,
+  sidebarOpen: PanelLeftOpen, sidebarClose: PanelLeftClose,
+} as const
+
+export type IconName = keyof typeof icons
+
+export function Icon({ name, ...props }: LucideProps & { name: IconName }) {
+  const Component = icons[name]
+  return <Component size={20} strokeWidth={1.7} aria-hidden="true" focusable="false" {...props} />
+}
