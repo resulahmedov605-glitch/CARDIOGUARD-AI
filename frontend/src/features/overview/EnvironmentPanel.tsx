@@ -9,7 +9,9 @@ export function EnvironmentPanel({ status, checkedAt, checkHealth }: Props) {
   return (
     <section className="panel environment-panel" aria-labelledby="environment-title">
       <div className="flex items-center justify-between">
-        <h2 id="environment-title" className="panel-title">Environment</h2>
+        <h2 id="environment-title" className="panel-title">
+          Environment
+        </h2>
         <Icon name="server" className="text-subtle" width="18" height="18" />
       </div>
       <p className="panel-description">A look at your local setup.</p>
@@ -20,7 +22,8 @@ export function EnvironmentPanel({ status, checkedAt, checkHealth }: Props) {
           <span className="environment-row-detail">React + TypeScript</span>
         </div>
         <span className="subtle-status">
-          <Icon name="success" width={15} height={15} className="text-success" />Running
+          <Icon name="success" width={15} height={15} className="text-success" />
+          Running
         </span>
       </div>
       <div className="environment-row">
@@ -29,7 +32,13 @@ export function EnvironmentPanel({ status, checkedAt, checkHealth }: Props) {
           <span className="environment-row-detail">Python · FastAPI</span>
         </div>
         <span className={`subtle-status health-${status}`} role="status">
-          <Icon name={status === 'checking' ? 'loading' : status === 'online' ? 'online' : 'offline'} width={15} height={15} className={status === 'checking' ? 'animate-spin' : undefined} />{label}
+          <Icon
+            name={status === 'checking' ? 'loading' : status === 'online' ? 'online' : 'offline'}
+            width={15}
+            height={15}
+            className={status === 'checking' ? 'animate-spin' : undefined}
+          />
+          {label}
         </span>
       </div>
       <div className="endpoint-box">

@@ -10,11 +10,15 @@ const collapsedKey = 'cardioguard.sidebarCollapsed'
 export const clampSidebarWidth = (width: number) =>
   Math.min(SIDEBAR_MAX_WIDTH, Math.max(SIDEBAR_MIN_WIDTH, Math.round(width)))
 
-const resolveWidth = (width: number) => width <= SIDEBAR_COLLAPSE_THRESHOLD
-  ? SIDEBAR_COLLAPSED_WIDTH : clampSidebarWidth(width)
+const resolveWidth = (width: number) =>
+  width <= SIDEBAR_COLLAPSE_THRESHOLD ? SIDEBAR_COLLAPSED_WIDTH : clampSidebarWidth(width)
 
 function savedCollapsed(): boolean {
-  try { return localStorage.getItem(collapsedKey) === 'true' } catch { return false }
+  try {
+    return localStorage.getItem(collapsedKey) === 'true'
+  } catch {
+    return false
+  }
 }
 
 function savedWidth(): number | null {
@@ -43,15 +47,19 @@ export function useSidebarWidth() {
   }, [])
 
   const expandedWidth = customWidth ?? (viewportWidth <= 1200 ? 224 : 256)
-  const width = viewportWidth < 1024 ? expandedWidth
-    : draftWidth ?? (isCollapsed ? SIDEBAR_COLLAPSED_WIDTH : expandedWidth)
+  const width =
+    viewportWidth < 1024
+      ? expandedWidth
+      : (draftWidth ?? (isCollapsed ? SIDEBAR_COLLAPSED_WIDTH : expandedWidth))
 
   function persistCollapsed(collapsed: boolean) {
     setIsCollapsed(collapsed)
     try {
       if (collapsed) localStorage.setItem(collapsedKey, 'true')
       else localStorage.removeItem(collapsedKey)
-    } catch { /* The in-memory choice remains usable. */ }
+    } catch {
+      /* The in-memory choice remains usable. */
+    }
   }
 
   return {
@@ -66,7 +74,11 @@ export function useSidebarWidth() {
       persistCollapsed(next === SIDEBAR_COLLAPSED_WIDTH)
       if (next !== SIDEBAR_COLLAPSED_WIDTH) {
         setCustomWidth(next)
-        try { localStorage.setItem(storageKey, String(next)) } catch { /* Resizing still works without storage. */ }
+        try {
+          localStorage.setItem(storageKey, String(next))
+        } catch {
+          /* Resizing still works without storage. */
+        }
       }
     },
     toggle: () => {
@@ -77,7 +89,11 @@ export function useSidebarWidth() {
       setCustomWidth(null)
       setDraftWidth(null)
       persistCollapsed(false)
-      try { localStorage.removeItem(storageKey) } catch { /* Use the responsive default for this session. */ }
+      try {
+        localStorage.removeItem(storageKey)
+      } catch {
+        /* Use the responsive default for this session. */
+      }
     },
   }
 }

@@ -1,107 +1,294 @@
 @reference "../../styles.css";
 
 @layer components {
-  .ecg-record-picker { @apply mb-5 flex flex-wrap items-center gap-4 rounded-xl border border-line bg-surface p-5; }
-  .ecg-source-icon { @apply flex size-12 items-center justify-center rounded-xl bg-danger-soft text-ecg; }
-  .ecg-source { @apply flex-1; }
-  .ecg-source strong { @apply block text-[16px] font-semibold; }
-  .ecg-source > span { @apply mt-1.5 block text-[14px] text-muted; }
-  .ecg-record-select, .ecg-controls > label { @apply flex flex-col gap-2 text-[14px] font-medium text-muted; }
-  .ecg-record-select { @apply min-w-44; }
-  .ecg-record-select select, .ecg-controls select, .ecg-controls input { @apply min-h-12 w-full rounded-lg border border-line bg-surface px-3 text-[15px] font-medium text-ink outline-none focus:border-primary focus:ring-2 focus:ring-tint-line; }
-  .ecg-record-select select:disabled { @apply bg-surface-muted text-subtle; }
-  .ecg-controls { @apply mb-6 grid grid-cols-[minmax(140px,1.3fr)_1fr_1fr_auto] items-end gap-x-4 gap-y-3 rounded-xl border border-line bg-surface p-5; }
-  .ecg-controls .primary-button { @apply h-12; }
-  .ecg-controls-hint { @apply col-span-full text-[13px] leading-5 text-muted; }
-  .ecg-form-error { @apply col-span-full text-[15px] text-danger; }
-  .ecg-chart-panel { @apply mb-5 min-w-0 overflow-hidden rounded-xl border border-line bg-surface; }
-  .ecg-chart-heading { @apply flex flex-wrap items-center justify-between gap-3 border-b border-line-soft px-6 py-5; }
-  .ecg-chart-heading h2 { @apply text-[18px] font-semibold; }
-  .ecg-chart-heading p { @apply mt-1.5 text-[14px] text-muted; }
-  .ecg-chart-heading p > span { @apply mx-1 text-faint; }
-  .ecg-sample-count { @apply flex items-center gap-2 rounded-md bg-surface-muted px-3 py-2 font-mono text-[13px] text-muted; }
-  .ecg-sample-count > span { @apply text-faint; }
-  .ecg-chart-toolbar { @apply flex flex-wrap items-center justify-between gap-3 px-6 pb-1 pt-4; }
-  .ecg-chart-toolbar > span { @apply text-[13px] text-subtle; }
-  .ecg-tool { @apply inline-flex min-h-10 shrink-0 items-center justify-center rounded-md border border-line bg-surface px-3 text-[14px] font-medium text-muted-strong hover:bg-surface-muted; }
-  .ecg-tool[aria-pressed="true"] { @apply border-tint-line bg-tint text-primary; }
-  .ecg-plot { @apply min-w-0; min-height: 440px; }
-  .ecg-chart-message { @apply flex min-h-[300px] flex-col items-center justify-center gap-4 rounded-xl border border-line-soft bg-surface px-6 text-center text-[15px] text-muted; }
-  .ecg-error { @apply my-4 flex flex-wrap items-center justify-between gap-4 rounded-lg border border-danger-line bg-danger-soft p-5 text-[15px] text-danger; }
-  .ecg-error strong { @apply font-semibold; }
-  .ecg-error p { @apply mt-2 max-w-2xl text-[14px] leading-6; }
-  .ecg-chart-panel > .ecg-error { @apply m-5 min-h-40; }
-  .ecg-empty { @apply flex min-h-[350px] flex-col items-center justify-center gap-4 rounded-xl border border-line bg-surface px-6 py-12 text-center text-muted; }
-  .ecg-empty h2 { @apply text-[22px] font-semibold text-ink; }
-  .ecg-empty p { @apply max-w-xl text-[15px] leading-6; }
-  .ecg-command { @apply break-all rounded-lg bg-surface-muted px-4 py-3 text-[15px] text-ink; }
-  .ecg-info-panel { @apply rounded-xl border border-line bg-surface p-6; }
-  .ecg-info-panel h2 { @apply mb-5 text-[16px] font-semibold; }
-  .ecg-info-grid { @apply grid grid-cols-5 gap-5; }
-  .ecg-info-grid dt { @apply mb-2 text-[13px] text-muted; }
-  .ecg-info-grid dd { @apply text-[16px] font-medium; }
-  .ecg-info-grid dd > span { @apply text-[14px] font-normal text-muted; }
-  .ecg-attribution { @apply mt-5 text-[12px] leading-6 text-muted; }
-  .ecg-attribution a { @apply text-primary hover:underline; }
-  .ecg-attribution > span { @apply block; }
+  .ecg-record-picker {
+    @apply mb-5 flex flex-wrap items-center gap-4 rounded-xl border border-line bg-surface p-5;
+  }
+  .ecg-source-icon {
+    @apply flex size-12 items-center justify-center rounded-xl bg-danger-soft text-ecg;
+  }
+  .ecg-source {
+    @apply flex-1;
+  }
+  .ecg-source strong {
+    @apply block text-[16px] font-semibold;
+  }
+  .ecg-source > span {
+    @apply mt-1.5 block text-[14px] text-muted;
+  }
+  .ecg-record-select,
+  .ecg-controls > label {
+    @apply flex flex-col gap-2 text-[14px] font-medium text-muted;
+  }
+  .ecg-record-select {
+    @apply min-w-44;
+  }
+  .ecg-record-select select,
+  .ecg-controls select,
+  .ecg-controls input {
+    @apply min-h-12 w-full rounded-lg border border-line bg-surface px-3 text-[15px] font-medium text-ink outline-none focus:border-primary focus:ring-2 focus:ring-tint-line;
+  }
+  .ecg-record-select select:disabled {
+    @apply bg-surface-muted text-subtle;
+  }
+  .ecg-controls {
+    @apply mb-6 grid grid-cols-[minmax(140px,1.3fr)_1fr_1fr_auto] items-end gap-x-4 gap-y-3 rounded-xl border border-line bg-surface p-5;
+  }
+  .ecg-controls .primary-button {
+    @apply h-12;
+  }
+  .ecg-controls-hint {
+    @apply col-span-full text-[13px] leading-5 text-muted;
+  }
+  .ecg-form-error {
+    @apply col-span-full text-[15px] text-danger;
+  }
+  .ecg-chart-panel {
+    @apply mb-5 min-w-0 overflow-hidden rounded-xl border border-line bg-surface;
+  }
+  .ecg-chart-heading {
+    @apply flex flex-wrap items-center justify-between gap-3 border-b border-line-soft px-6 py-5;
+  }
+  .ecg-chart-heading h2 {
+    @apply text-[18px] font-semibold;
+  }
+  .ecg-chart-heading p {
+    @apply mt-1.5 text-[14px] text-muted;
+  }
+  .ecg-chart-heading p > span {
+    @apply mx-1 text-faint;
+  }
+  .ecg-sample-count {
+    @apply flex items-center gap-2 rounded-md bg-surface-muted px-3 py-2 font-mono text-[13px] text-muted;
+  }
+  .ecg-sample-count > span {
+    @apply text-faint;
+  }
+  .ecg-chart-toolbar {
+    @apply flex flex-wrap items-center justify-between gap-3 px-6 pb-1 pt-4;
+  }
+  .ecg-chart-toolbar > span {
+    @apply text-[13px] text-subtle;
+  }
+  .ecg-tool {
+    @apply inline-flex min-h-10 shrink-0 items-center justify-center rounded-md border border-line bg-surface px-3 text-[14px] font-medium text-muted-strong hover:bg-surface-muted;
+  }
+  .ecg-tool[aria-pressed='true'] {
+    @apply border-tint-line bg-tint text-primary;
+  }
+  .ecg-plot {
+    @apply min-w-0;
+    min-height: 440px;
+  }
+  .ecg-chart-message {
+    @apply flex min-h-[300px] flex-col items-center justify-center gap-4 rounded-xl border border-line-soft bg-surface px-6 text-center text-[15px] text-muted;
+  }
+  .ecg-error {
+    @apply my-4 flex flex-wrap items-center justify-between gap-4 rounded-lg border border-danger-line bg-danger-soft p-5 text-[15px] text-danger;
+  }
+  .ecg-error strong {
+    @apply font-semibold;
+  }
+  .ecg-error p {
+    @apply mt-2 max-w-2xl text-[14px] leading-6;
+  }
+  .ecg-chart-panel > .ecg-error {
+    @apply m-5 min-h-40;
+  }
+  .ecg-empty {
+    @apply flex min-h-[350px] flex-col items-center justify-center gap-4 rounded-xl border border-line bg-surface px-6 py-12 text-center text-muted;
+  }
+  .ecg-empty h2 {
+    @apply text-[22px] font-semibold text-ink;
+  }
+  .ecg-empty p {
+    @apply max-w-xl text-[15px] leading-6;
+  }
+  .ecg-command {
+    @apply break-all rounded-lg bg-surface-muted px-4 py-3 text-[15px] text-ink;
+  }
+  .ecg-info-panel {
+    @apply rounded-xl border border-line bg-surface p-6;
+  }
+  .ecg-info-panel h2 {
+    @apply mb-5 text-[16px] font-semibold;
+  }
+  .ecg-info-grid {
+    @apply grid grid-cols-5 gap-5;
+  }
+  .ecg-info-grid dt {
+    @apply mb-2 text-[13px] text-muted;
+  }
+  .ecg-info-grid dd {
+    @apply text-[16px] font-medium;
+  }
+  .ecg-info-grid dd > span {
+    @apply text-[14px] font-normal text-muted;
+  }
+  .ecg-attribution {
+    @apply mt-5 text-[12px] leading-6 text-muted;
+  }
+  .ecg-attribution a {
+    @apply text-primary hover:underline;
+  }
+  .ecg-attribution > span {
+    @apply block;
+  }
 }
 
 @media (max-width: 1100px) {
-  .ecg-controls { grid-template-columns: 1fr 1fr; }
-  .ecg-info-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .ecg-controls {
+    grid-template-columns: 1fr 1fr;
+  }
+  .ecg-info-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 @media (max-width: 600px) {
-  .ecg-record-select { width: 100%; }
-  .ecg-controls { gap: 16px; }
-  .ecg-controls, .ecg-record-picker, .ecg-info-panel { padding: 18px; }
-  .ecg-info-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .ecg-chart-heading, .ecg-chart-toolbar { padding-inline: 18px; }
-  .ecg-chart-toolbar { align-items: flex-start; flex-direction: column; }
+  .ecg-record-select {
+    width: 100%;
+  }
+  .ecg-controls {
+    gap: 16px;
+  }
+  .ecg-controls,
+  .ecg-record-picker,
+  .ecg-info-panel {
+    padding: 18px;
+  }
+  .ecg-info-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .ecg-chart-heading,
+  .ecg-chart-toolbar {
+    padding-inline: 18px;
+  }
+  .ecg-chart-toolbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
 }
 
 @container workspace (max-width: 850px) {
-  .ecg-controls, .ecg-processing-grid, .ecg-statistics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .ecg-info-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .ecg-controls,
+  .ecg-processing-grid,
+  .ecg-statistics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .ecg-info-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 
 @container workspace (max-width: 600px) {
-  .ecg-info-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .ecg-info-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @layer components {
-  .ecg-analysis-controls { @apply border-b border-line-soft bg-surface-muted p-6; }
-  .ecg-analysis-title { @apply mb-4 flex flex-wrap items-center gap-3 text-[15px]; }
-  .ecg-analysis-title > span { @apply text-[13px] text-muted; }
-  .ecg-processing-grid { @apply grid grid-cols-4 items-end gap-4; }
-  .ecg-main-processing { grid-template-columns: repeat(5, minmax(0, 1fr)); }
-  .ecg-processing-grid > label { @apply flex min-w-0 flex-col gap-2 text-[14px] text-muted-strong; }
-  .ecg-filter-field, .ecg-filter-field > label { @apply flex min-w-0 flex-col gap-2 text-[14px] text-muted-strong; }
-  .ecg-filter-field > label:first-child { @apply flex-row items-center; }
-  .ecg-processing-grid input[type='number'], .ecg-processing-grid select { @apply min-h-12 w-full rounded-lg border border-line bg-surface px-3 text-[15px] text-ink; }
-  .ecg-processing-grid input:disabled { @apply bg-surface-muted text-subtle; }
-  .ecg-processing-grid button { @apply min-h-12; }
-  .ecg-processing-grid button:disabled { @apply cursor-wait opacity-60; }
-  .ecg-detection-settings { @apply my-4 text-[14px] text-muted-strong; }
-  .ecg-detection-settings summary { @apply mb-3 cursor-pointer; }
-  .ecg-visibility-controls { @apply flex flex-wrap gap-5 px-6 pt-5 text-[14px] text-muted-strong; }
-  .ecg-visibility-controls label { @apply inline-flex items-center gap-2; }
-  .ecg-analysis-notice { @apply px-6 py-3 text-[13px] leading-5 text-muted; }
-  .ecg-statistics { @apply grid grid-cols-4 gap-5 border-y border-line-soft bg-surface-muted p-6; }
-  .ecg-statistics dt { @apply mb-2 text-[13px] text-muted; }
-  .ecg-statistics dd { @apply text-[22px] font-semibold text-ink; }
-  .ecg-analysis-details { @apply border-b border-line-soft px-6 py-4 text-[14px] leading-6 text-muted-strong; }
-  .ecg-analysis-details summary { @apply cursor-pointer font-medium text-ink; }
-  .ecg-table-scroll { @apply mt-3 overflow-x-auto; }
-  .ecg-table-scroll table { @apply w-full text-left font-mono text-[13px]; }
-  .ecg-table-scroll th, .ecg-table-scroll td { @apply whitespace-nowrap border-b border-line-soft px-3 py-2; }
-  .ecg-analysis-warnings { @apply p-6 text-[13px] leading-6 text-muted; }
-  .ecg-analysis-warnings strong { @apply text-muted-strong; }
-  .ecg-analysis-warnings ul { @apply mt-2 list-disc space-y-1 pl-4; }
+  .ecg-analysis-controls {
+    @apply border-b border-line-soft bg-surface-muted p-6;
+  }
+  .ecg-analysis-title {
+    @apply mb-4 flex flex-wrap items-center gap-3 text-[15px];
+  }
+  .ecg-analysis-title > span {
+    @apply text-[13px] text-muted;
+  }
+  .ecg-processing-grid {
+    @apply grid grid-cols-4 items-end gap-4;
+  }
+  .ecg-main-processing {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+  .ecg-processing-grid > label {
+    @apply flex min-w-0 flex-col gap-2 text-[14px] text-muted-strong;
+  }
+  .ecg-filter-field,
+  .ecg-filter-field > label {
+    @apply flex min-w-0 flex-col gap-2 text-[14px] text-muted-strong;
+  }
+  .ecg-filter-field > label:first-child {
+    @apply flex-row items-center;
+  }
+  .ecg-processing-grid input[type='number'],
+  .ecg-processing-grid select {
+    @apply min-h-12 w-full rounded-lg border border-line bg-surface px-3 text-[15px] text-ink;
+  }
+  .ecg-processing-grid input:disabled {
+    @apply bg-surface-muted text-subtle;
+  }
+  .ecg-processing-grid button {
+    @apply min-h-12;
+  }
+  .ecg-processing-grid button:disabled {
+    @apply cursor-wait opacity-60;
+  }
+  .ecg-detection-settings {
+    @apply my-4 text-[14px] text-muted-strong;
+  }
+  .ecg-detection-settings summary {
+    @apply mb-3 cursor-pointer;
+  }
+  .ecg-visibility-controls {
+    @apply flex flex-wrap gap-5 px-6 pt-5 text-[14px] text-muted-strong;
+  }
+  .ecg-visibility-controls label {
+    @apply inline-flex items-center gap-2;
+  }
+  .ecg-analysis-notice {
+    @apply px-6 py-3 text-[13px] leading-5 text-muted;
+  }
+  .ecg-statistics {
+    @apply grid grid-cols-4 gap-5 border-y border-line-soft bg-surface-muted p-6;
+  }
+  .ecg-statistics dt {
+    @apply mb-2 text-[13px] text-muted;
+  }
+  .ecg-statistics dd {
+    @apply text-[22px] font-semibold text-ink;
+  }
+  .ecg-analysis-details {
+    @apply border-b border-line-soft px-6 py-4 text-[14px] leading-6 text-muted-strong;
+  }
+  .ecg-analysis-details summary {
+    @apply cursor-pointer font-medium text-ink;
+  }
+  .ecg-table-scroll {
+    @apply mt-3 overflow-x-auto;
+  }
+  .ecg-table-scroll table {
+    @apply w-full text-left font-mono text-[13px];
+  }
+  .ecg-table-scroll th,
+  .ecg-table-scroll td {
+    @apply whitespace-nowrap border-b border-line-soft px-3 py-2;
+  }
+  .ecg-analysis-warnings {
+    @apply p-6 text-[13px] leading-6 text-muted;
+  }
+  .ecg-analysis-warnings strong {
+    @apply text-muted-strong;
+  }
+  .ecg-analysis-warnings ul {
+    @apply mt-2 list-disc space-y-1 pl-4;
+  }
 }
 @media (max-width: 1100px) {
-  .ecg-processing-grid, .ecg-statistics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .ecg-processing-grid,
+  .ecg-statistics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 @media (max-width: 600px) {
-  .ecg-analysis-controls, .ecg-statistics, .ecg-analysis-warnings { padding: 18px; }
-  .ecg-visibility-controls { gap: 12px; padding-inline: 18px; }
+  .ecg-analysis-controls,
+  .ecg-statistics,
+  .ecg-analysis-warnings {
+    padding: 18px;
+  }
+  .ecg-visibility-controls {
+    gap: 12px;
+    padding-inline: 18px;
+  }
 }

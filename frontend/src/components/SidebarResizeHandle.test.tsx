@@ -19,11 +19,20 @@ class TestPointerEvent extends MouseEvent {
 
 function Workspace() {
   const sidebar = useSidebarWidth()
-  return <div data-testid="workspace" data-resizing={sidebar.resizing}>
-    <Sidebar section="overview" collapsed={sidebar.collapsed} onToggle={sidebar.toggle} />
-    <SidebarResizeHandle width={sidebar.width} collapsed={sidebar.collapsed} onPreview={sidebar.preview}
-      onCommit={sidebar.commit} onCancel={sidebar.cancel} onReset={sidebar.reset} onToggle={sidebar.toggle} />
-  </div>
+  return (
+    <div data-testid="workspace" data-resizing={sidebar.resizing}>
+      <Sidebar section="overview" collapsed={sidebar.collapsed} onToggle={sidebar.toggle} />
+      <SidebarResizeHandle
+        width={sidebar.width}
+        collapsed={sidebar.collapsed}
+        onPreview={sidebar.preview}
+        onCommit={sidebar.commit}
+        onCancel={sidebar.cancel}
+        onReset={sidebar.reset}
+        onToggle={sidebar.toggle}
+      />
+    </div>
+  )
 }
 
 function resizeHandle() {
@@ -104,11 +113,17 @@ test('keyboard resizing and reset preserve responsive defaults until a custom wi
   fireEvent.doubleClick(handle)
   expect(width()).toBe(256)
   expect(localStorage.getItem(storageKey)).toBeNull()
-  act(() => { window.innerWidth = 1150; window.dispatchEvent(new Event('resize')) })
+  act(() => {
+    window.innerWidth = 1150
+    window.dispatchEvent(new Event('resize'))
+  })
   expect(width()).toBe(224)
   fireEvent.keyDown(handle, { key: 'ArrowRight' })
   expect(width()).toBe(232)
-  act(() => { window.innerWidth = 1440; window.dispatchEvent(new Event('resize')) })
+  act(() => {
+    window.innerWidth = 1440
+    window.dispatchEvent(new Event('resize'))
+  })
   expect(width()).toBe(232)
   fireEvent.doubleClick(handle)
   expect(width()).toBe(256)
@@ -119,9 +134,15 @@ test('invalid saved values fall back safely and storage failures do not prevent 
   const { unmount } = render(<Workspace />)
   expect(width()).toBe(256)
   unmount()
-  vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => { throw new Error('Storage unavailable') })
-  vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => { throw new Error('Storage unavailable') })
-  vi.spyOn(Storage.prototype, 'removeItem').mockImplementation(() => { throw new Error('Storage unavailable') })
+  vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
+    throw new Error('Storage unavailable')
+  })
+  vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+    throw new Error('Storage unavailable')
+  })
+  vi.spyOn(Storage.prototype, 'removeItem').mockImplementation(() => {
+    throw new Error('Storage unavailable')
+  })
   render(<Workspace />)
   const handle = resizeHandle()
   fireEvent.keyDown(handle, { key: 'ArrowRight' })
@@ -162,7 +183,9 @@ test('dragging past the collapse threshold persists the rail and retains the exp
   fireEvent.pointerUp(handle, { clientX: 120 })
   expect(localStorage.getItem(collapsedKey)).toBe('true')
   expect(localStorage.getItem(storageKey)).toBe('320')
-  expect(screen.getByRole('link', { name: 'ECG Analyzer' }).getAttribute('href')).toBe('#/ecg-analyzer')
+  expect(screen.getByRole('link', { name: 'ECG Analyzer' }).getAttribute('href')).toBe(
+    '#/ecg-analyzer',
+  )
   unmount()
   render(<Workspace />)
   expect(width()).toBe(72)
@@ -171,7 +194,9 @@ test('dragging past the collapse threshold persists the rail and retains the exp
   fireEvent.click(expand)
   expect(width()).toBe(320)
   expect(localStorage.getItem(collapsedKey)).toBeNull()
-  expect(screen.getByRole('button', { name: 'Collapse sidebar' }).getAttribute('aria-expanded')).toBe('true')
+  expect(
+    screen.getByRole('button', { name: 'Collapse sidebar' }).getAttribute('aria-expanded'),
+  ).toBe('true')
   fireEvent.click(screen.getByRole('button', { name: 'Collapse sidebar' }))
   const restoredHandle = resizeHandle()
   fireEvent.pointerDown(restoredHandle, { clientX: 72 })
@@ -211,10 +236,18 @@ test('mobile navigation stays expanded while retaining the desktop collapsed pre
   localStorage.setItem(collapsedKey, 'true')
   render(<Workspace />)
   expect(width()).toBe(72)
-  act(() => { window.innerWidth = 393; window.dispatchEvent(new Event('resize')) })
+  act(() => {
+    window.innerWidth = 393
+    window.dispatchEvent(new Event('resize'))
+  })
   expect(width()).toBe(300)
-  expect(document.getElementById('workspace-sidebar')!.classList.contains('sidebar-collapsed')).toBe(false)
+  expect(
+    document.getElementById('workspace-sidebar')!.classList.contains('sidebar-collapsed'),
+  ).toBe(false)
   expect(localStorage.getItem(collapsedKey)).toBe('true')
-  act(() => { window.innerWidth = 1440; window.dispatchEvent(new Event('resize')) })
+  act(() => {
+    window.innerWidth = 1440
+    window.dispatchEvent(new Event('resize'))
+  })
   expect(width()).toBe(72)
 })

@@ -11,7 +11,9 @@ function initialTheme(): Theme {
   try {
     const saved = localStorage.getItem(storageKey)
     if (saved === 'light' || saved === 'dark') return saved
-  } catch { /* Storage can be unavailable in private or restricted sessions. */ }
+  } catch {
+    /* Storage can be unavailable in private or restricted sessions. */
+  }
   return window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
 }
 
@@ -20,11 +22,22 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     document.documentElement.dataset.theme = theme
     document.documentElement.style.colorScheme = theme
-    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme === 'dark' ? '#100F14' : '#F8FAFC')
-    try { localStorage.setItem(storageKey, theme) } catch { /* Keep the in-memory choice usable. */ }
+    document
+      .querySelector('meta[name="theme-color"]')
+      ?.setAttribute('content', theme === 'dark' ? '#100F14' : '#F8FAFC')
+    try {
+      localStorage.setItem(storageKey, theme)
+    } catch {
+      /* Keep the in-memory choice usable. */
+    }
   }, [theme])
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme: () => setTheme((value) => value === 'light' ? 'dark' : 'light') }}>
+    <ThemeContext.Provider
+      value={{
+        theme,
+        toggleTheme: () => setTheme((value) => (value === 'light' ? 'dark' : 'light')),
+      }}
+    >
       {children}
     </ThemeContext.Provider>
   )

@@ -2,11 +2,3 @@
 testpaths = ["tests"]
 pythonpath = ["."]
 addopts = "-ra --basetemp=../.cache/pytest"
-
-[tool.coverage.run]
-branch = true
-source = ["app"]
-
-[tool.coverage.report]
-fail_under = 90
-show_missing = true

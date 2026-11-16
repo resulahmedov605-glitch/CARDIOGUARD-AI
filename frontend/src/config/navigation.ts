@@ -16,7 +16,8 @@ export const modules = [
     icon: 'brain',
     color: 'blue',
     category: 'MACHINE LEARNING',
-    description: 'Connect the data to the decisions. Learn how heartbeat classification models work.',
+    description:
+      'Connect the data to the decisions. Learn how heartbeat classification models work.',
     planned: ['Dataset exploration', 'Heartbeat classification', 'Model evaluation'],
   },
   {

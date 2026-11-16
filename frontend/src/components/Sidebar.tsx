@@ -1,8 +1,14 @@
 import { navigation, type SectionId } from '../config/navigation'
 import { Icon } from './Icon'
 
-export function Sidebar({ section, collapsed, onToggle }: {
-  section: SectionId; collapsed: boolean; onToggle: () => void
+export function Sidebar({
+  section,
+  collapsed,
+  onToggle,
+}: {
+  section: SectionId
+  collapsed: boolean
+  onToggle: () => void
 }) {
   return (
     <aside id="workspace-sidebar" className={`sidebar${collapsed ? ' sidebar-collapsed' : ''}`}>
@@ -20,10 +26,15 @@ export function Sidebar({ section, collapsed, onToggle }: {
 
       <div className="sidebar-heading">
         <div className="nav-label">WORKSPACE</div>
-        <button type="button" className="sidebar-toggle" onClick={onToggle}
+        <button
+          type="button"
+          className="sidebar-toggle"
+          onClick={onToggle}
           aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-          aria-expanded={!collapsed} aria-controls="workspace-navigation">
+          aria-expanded={!collapsed}
+          aria-controls="workspace-navigation"
+        >
           <Icon name={collapsed ? 'sidebarOpen' : 'sidebarClose'} width={18} height={18} />
         </button>
       </div>
@@ -39,7 +50,9 @@ export function Sidebar({ section, collapsed, onToggle }: {
           >
             <Icon name={item.icon} />
             <span>{item.title}</span>
-            {section === item.id && <Icon name="chevron" width={14} height={14} className="nav-active-indicator" />}
+            {section === item.id && (
+              <Icon name="chevron" width={14} height={14} className="nav-active-indicator" />
+            )}
           </a>
         ))}
       </nav>

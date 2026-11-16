@@ -8,8 +8,8 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
-from app.api.v1.router import api_router
-from app.services.ecg import ECGError
+from app.routes import router
+from app.dataset import ECGError
 
 
 def safe_validation_detail(value: Any) -> Any:
@@ -33,7 +33,7 @@ def create_app() -> FastAPI:
         docs_url=None,
         redoc_url=None,
     )
-    application.include_router(api_router, prefix="/api/v1")
+    application.include_router(router, prefix="/api/v1")
 
     @application.exception_handler(ECGError)
     async def handle_ecg_error(_request: Request, exc: ECGError) -> JSONResponse:

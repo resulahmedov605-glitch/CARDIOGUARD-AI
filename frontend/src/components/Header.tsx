@@ -18,9 +18,13 @@ export function Header({ section }: { section: SectionId }) {
           <Icon name="monitor" width={15} height={15} className="text-primary" />
           Local environment
         </span>
-        <button type="button" className="theme-toggle" onClick={toggleTheme}
+        <button
+          type="button"
+          className="theme-toggle"
+          onClick={toggleTheme}
           aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-          title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}>
+          title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+        >
           <Icon name={theme === 'dark' ? 'sun' : 'moon'} width="19" height="19" />
           <span>{theme === 'dark' ? 'Light mode' : 'Dark mode'}</span>
         </button>

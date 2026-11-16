@@ -8,7 +8,7 @@ import wfdb
 from fastapi.testclient import TestClient
 
 from app.main import create_app
-from app.services.ecg import ECGError, ECGService, get_ecg_service, sample_ceiling
+from app.dataset import ECGError, ECGService, get_ecg_service, sample_ceiling
 
 
 @pytest.fixture
@@ -36,7 +36,7 @@ def test_available_records(client: TestClient, dataset: Path) -> None:
     response = client.get("/api/v1/ecg/records")
     assert response.status_code == 200
     assert [record["record_id"] for record in response.json()["records"]] == ["100"]
-    assert response.json()["unavailable_records"] == []
+    assert {record["record_id"] for record in response.json()["unavailable_records"]} == {"106", "119", "200", "208"}
 
 
 def test_metadata(client: TestClient) -> None:

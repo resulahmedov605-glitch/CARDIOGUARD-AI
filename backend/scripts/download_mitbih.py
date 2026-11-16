@@ -14,7 +14,7 @@ from shutil import copyfile
 import wfdb
 import certifi
 
-from app.services.ecg import DATA_DIRECTORY, ECGError, ECGService, KNOWN_RECORDS
+from app.dataset import DATA_DIRECTORY, ECGError, ECGService, KNOWN_RECORDS
 
 
 def download_ssl_context() -> ssl.SSLContext:
@@ -106,8 +106,23 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--record", choices=KNOWN_RECORDS, default="100")
     parser.add_argument("--annotations", action="store_true", help="Also download official reference beat annotations")
+    parser.add_argument("--ml", action="store_true", help="Install missing Sprint 3 records and annotations; preserve installed files")
     args = parser.parse_args()
     try:
-        download(args.record, args.annotations)
+        if args.ml:
+            for record_id in KNOWN_RECORDS:
+                names = [f"{record_id}.{extension}" for extension in ("hea", "dat", "atr")]
+                existing = [(DATA_DIRECTORY / name).exists() for name in names]
+                if all(existing):
+                    service = ECGService()
+                    metadata = service.metadata(record_id)
+                    service.annotations(record_id, 0, metadata.sample_count)
+                    print(f"Keeping installed record {record_id}")
+                elif any(existing):
+                    raise ValueError(f"Record {record_id} is incomplete; review it before explicitly repairing with --record {record_id} --annotations")
+                else:
+                    download(record_id, annotations=True)
+        else:
+            download(args.record, args.annotations)
     except (ECGError, OSError, ValueError, RuntimeError) as exc:
         parser.exit(1, f"Dataset download failed: {exc}\nNo substitute data was generated.\n")

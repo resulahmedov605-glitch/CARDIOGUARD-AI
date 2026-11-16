@@ -1,8 +1,7 @@
 # MIT-BIH local data
 
 `mitbih/` is the canonical location for the ECG viewer's local WFDB records.
-The older `datasets/` scaffold remains reserved for future derived datasets; no
-existing directories have been moved or removed.
+The application reads this directory directly; no second dataset location is needed.
 
 From `backend/`, run:
 

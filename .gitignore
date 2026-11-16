@@ -27,16 +27,7 @@ htmlcov/
 # Local research assets and SQLite databases
 data/mitbih/*
 !data/mitbih/.gitkeep
-datasets/raw/*
-!datasets/raw/.gitkeep
-datasets/processed/*
-!datasets/processed/.gitkeep
-models/*
-!models/README.md
-!models/.gitkeep
-storage/*
-!storage/README.md
-!storage/.gitkeep
+data/models/
 *.db
 *.db-*
 *.sqlite

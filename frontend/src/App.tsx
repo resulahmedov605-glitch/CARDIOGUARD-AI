@@ -6,6 +6,7 @@ import { navigation, sectionFromHash } from './config/navigation'
 import { ModulePlaceholder } from './features/modules/ModulePlaceholder'
 import { Overview } from './features/overview/Overview'
 import { ECGAnalyzer } from './features/ecg/ECGAnalyzer'
+import { AILab } from './features/ai/AILab'
 import { useHealth } from './hooks/useHealth'
 import { NotificationCenter } from './components/NotificationCenter'
 import { SidebarResizeHandle } from './components/SidebarResizeHandle'
@@ -29,8 +30,10 @@ export default function App() {
   }, [section])
 
   return (
-    <div className={`app-shell${sidebar.resizing ? ' sidebar-resizing' : ''}`}
-      style={{ '--sidebar-width': `${sidebar.width}px` } as CSSProperties}>
+    <div
+      className={`app-shell${sidebar.resizing ? ' sidebar-resizing' : ''}`}
+      style={{ '--sidebar-width': `${sidebar.width}px` } as CSSProperties}
+    >
       <NotificationCenter />
       <a
         className="skip-link"
@@ -44,8 +47,15 @@ export default function App() {
         Skip to content
       </a>
       <Sidebar section={section} collapsed={sidebar.collapsed} onToggle={sidebar.toggle} />
-      <SidebarResizeHandle width={sidebar.width} collapsed={sidebar.collapsed} onPreview={sidebar.preview}
-        onCommit={sidebar.commit} onCancel={sidebar.cancel} onReset={sidebar.reset} onToggle={sidebar.toggle} />
+      <SidebarResizeHandle
+        width={sidebar.width}
+        collapsed={sidebar.collapsed}
+        onPreview={sidebar.preview}
+        onCommit={sidebar.commit}
+        onCancel={sidebar.cancel}
+        onReset={sidebar.reset}
+        onToggle={sidebar.toggle}
+      />
       <div className="app-content">
         <Header section={section} />
         <main id="main-content" className="main-content" tabIndex={-1}>
@@ -53,6 +63,8 @@ export default function App() {
             <Overview {...health} />
           ) : section === 'ecg-analyzer' ? (
             <ECGAnalyzer />
+          ) : section === 'ai-lab' ? (
+            <AILab />
           ) : (
             <ModulePlaceholder section={section} />
           )}

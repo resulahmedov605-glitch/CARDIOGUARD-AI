@@ -1,0 +1,298 @@
+{
+  "feature_version": "mlii-360-bandpass-zscore-80-v1",
+  "feature_names": [
+    "wave_0",
+    "wave_1",
+    "wave_2",
+    "wave_3",
+    "wave_4",
+    "wave_5",
+    "wave_6",
+    "wave_7",
+    "wave_8",
+    "wave_9",
+    "wave_10",
+    "wave_11",
+    "wave_12",
+    "wave_13",
+    "wave_14",
+    "wave_15",
+    "wave_16",
+    "wave_17",
+    "wave_18",
+    "wave_19",
+    "wave_20",
+    "wave_21",
+    "wave_22",
+    "wave_23",
+    "wave_24",
+    "wave_25",
+    "wave_26",
+    "wave_27",
+    "wave_28",
+    "wave_29",
+    "wave_30",
+    "wave_31",
+    "wave_32",
+    "wave_33",
+    "wave_34",
+    "wave_35",
+    "wave_36",
+    "wave_37",
+    "wave_38",
+    "wave_39",
+    "wave_40",
+    "wave_41",
+    "wave_42",
+    "wave_43",
+    "wave_44",
+    "wave_45",
+    "wave_46",
+    "wave_47",
+    "wave_48",
+    "wave_49",
+    "wave_50",
+    "wave_51",
+    "wave_52",
+    "wave_53",
+    "wave_54",
+    "wave_55",
+    "wave_56",
+    "wave_57",
+    "wave_58",
+    "wave_59",
+    "wave_60",
+    "wave_61",
+    "wave_62",
+    "wave_63",
+    "wave_64",
+    "wave_65",
+    "wave_66",
+    "wave_67",
+    "wave_68",
+    "wave_69",
+    "wave_70",
+    "wave_71",
+    "minimum",
+    "maximum",
+    "range",
+    "mean_absolute",
+    "gradient_rms",
+    "early_energy",
+    "qrs_energy",
+    "late_energy"
+  ],
+  "supported_classes": [
+    "N",
+    "V"
+  ],
+  "sklearn_version": "1.9.1",
+  "configuration": {
+    "n_estimators": 200,
+    "max_depth": 12,
+    "min_samples_leaf": 3,
+    "class_weight": "balanced_subsample",
+    "random_state": 42,
+    "n_jobs": 1
+  },
+  "splits": {
+    "train": [
+      "100",
+      "106",
+      "200"
+    ],
+    "validation": [
+      "119"
+    ],
+    "test": [
+      "208"
+    ]
+  },
+  "records": {
+    "100": {
+      "split": "train",
+      "patient_group": "100",
+      "sampling_frequency_hz": 360,
+      "included": {
+        "N": 2199,
+        "V": 1
+      },
+      "excluded": {
+        "unsupported:+": 1,
+        "unsupported:A": 33,
+        "boundary_or_flat": 40
+      },
+      "sha256": {
+        "hea": "60ebc904c7bf3e04d142638d3fd5c903e8dc9f10f1ea3264e07926aa089ee75e",
+        "dat": "b2ea3c250e56e48f4b7b90697832b8ecd1afa1e0bb31f2dcfea4ed6e1075a639",
+        "atr": "8d8a5349fb16638ebbf649f1779d12e96d91b736b2aafe59db43719ae583d471"
+      }
+    },
+    "106": {
+      "split": "train",
+      "patient_group": "106",
+      "sampling_frequency_hz": 360,
+      "included": {
+        "N": 1481,
+        "V": 511
+      },
+      "excluded": {
+        "unsupported:~": 30,
+        "unsupported:+": 41,
+        "boundary_or_flat": 35
+      },
+      "sha256": {
+        "hea": "ad5ed3ee5603926a07a09f0d0c9e2a7ff10a705dbafcde3d185317730a8839ab",
+        "dat": "c017bc18b95b1f970bca143a044ee5d54168648b541e47aa656f2737a59c1202",
+        "atr": "585347e6d1bd3ad89cdb52cb80945878a5e51026d81f871a376bb6e13936f7fa"
+      }
+    },
+    "200": {
+      "split": "train",
+      "patient_group": "200",
+      "sampling_frequency_hz": 360,
+      "included": {
+        "V": 802,
+        "N": 1712
+      },
+      "excluded": {
+        "unsupported:+": 148,
+        "boundary_or_flat": 55,
+        "unsupported:A": 30,
+        "unsupported:~": 43,
+        "unsupported:F": 2
+      },
+      "sha256": {
+        "hea": "9e0c2ff5b790cf624deab0ccb8a9f211a9e29a748d8197da3c1ee7c5b596b40c",
+        "dat": "a9e203b3807b9fcd3647cde03444437cb8eec7f5128a8eb413edafb394272e0f",
+        "atr": "f9624a11696760427d75314a78c31f89ca3c446af855890c8f8b66cddd8b3a3f"
+      }
+    },
+    "119": {
+      "split": "validation",
+      "patient_group": "119",
+      "sampling_frequency_hz": 360,
+      "included": {
+        "N": 1512,
+        "V": 437
+      },
+      "excluded": {
+        "unsupported:+": 103,
+        "boundary_or_flat": 38,
+        "unsupported:~": 4
+      },
+      "sha256": {
+        "hea": "658f01382d7280a06e2f4c06363569d477394a6898c69ee788bb383f6092df63",
+        "dat": "02a286a28e69b441568add915f16a2856b22bab893bf8729ee9654411ed3a5aa",
+        "atr": "fd919c8ea20eed4a22fb37984977f30ce48d382eefd2d90934bf947a88e0fd7b"
+      }
+    },
+    "208": {
+      "split": "test",
+      "patient_group": "208",
+      "sampling_frequency_hz": 360,
+      "included": {
+        "V": 974,
+        "N": 1554
+      },
+      "excluded": {
+        "unsupported:+": 53,
+        "unsupported:F": 373,
+        "unsupported:~": 24,
+        "boundary_or_flat": 50,
+        "unsupported:|": 8,
+        "unsupported:S": 2,
+        "unsupported:Q": 2
+      },
+      "sha256": {
+        "hea": "5a27efda1bea972440a0b5f40a1c322898693e9602d5ce4722fe750b7dea46e9",
+        "dat": "22873623623c44ee413a5b60cacb15d4af2723734836fb3ae45d9ff96bdb36e7",
+        "atr": "33878519ee34d00cb233fdb15b11c2b8da0b0aea2e643d31b07105cc3392edf4"
+      }
+    }
+  },
+  "version": "603d5a015e2f5cc4",
+  "algorithm": "RandomForestClassifier",
+  "created_at": "2026-11-16T07:33:22.788317+00:00",
+  "beat_window": {
+    "before_samples": 72,
+    "after_samples": 144,
+    "sampling_frequency_hz": 360
+  },
+  "preprocessing": "Independent <=30s windows; existing 0.5\u201340 Hz order-3 filter; per-beat population z-score; 72 waveform samples + 8 shape features",
+  "selection": "Only annotation symbols N and V; unsupported labels excluded; complete nonflat beats only; fixed patient-disjoint split",
+  "evaluation_scope": "Annotated, refined beat centers; not detector-plus-classifier accuracy or clinical validation",
+  "evaluation": {
+    "validation": {
+      "accuracy": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "per_class": {
+        "N": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 1512.0
+        },
+        "V": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 437.0
+        }
+      },
+      "confusion_matrix": [
+        [
+          1512,
+          0
+        ],
+        [
+          0,
+          437
+        ]
+      ],
+      "confusion_labels": [
+        "N",
+        "V"
+      ],
+      "sample_count": 1949
+    },
+    "test": {
+      "accuracy": 0.9920886075949367,
+      "precision": 0.9900978662634409,
+      "recall": 0.9933733968641566,
+      "f1": 0.9916772840554804,
+      "per_class": {
+        "N": {
+          "precision": 0.9993489583333334,
+          "recall": 0.9877734877734877,
+          "f1-score": 0.9935275080906149,
+          "support": 1554.0
+        },
+        "V": {
+          "precision": 0.9808467741935484,
+          "recall": 0.9989733059548255,
+          "f1-score": 0.9898270600203459,
+          "support": 974.0
+        }
+      },
+      "confusion_matrix": [
+        [
+          1535,
+          19
+        ],
+        [
+          1,
+          973
+        ]
+      ],
+      "confusion_labels": [
+        "N",
+        "V"
+      ],
+      "sample_count": 2528
+    }
+  },
+  "artifact_sha256": "cdd8966f9393ae744f28f016930a7a0fbfe8f0409061745ba3378414712abe66"
+}

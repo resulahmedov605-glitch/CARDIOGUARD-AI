@@ -5,9 +5,9 @@ import wfdb
 from fastapi.testclient import TestClient
 from test_ecg import dataset, client  # Reuse the offline WFDB fixtures.
 from app.main import create_app
-from app.services.ecg import ECGService,get_ecg_service,DATA_DIRECTORY
-from app.services.analysis import analyze
-from app.schemas.analysis import AnalysisRequest
+from app.dataset import ECGService,get_ecg_service,DATA_DIRECTORY
+from app.analysis import analyze
+from app.schemas import AnalysisRequest
 
 
 def test_analysis_contract_preserves_raw_signal_and_sample_alignment(client):

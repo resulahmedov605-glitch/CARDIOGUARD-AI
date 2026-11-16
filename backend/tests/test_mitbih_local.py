@@ -5,7 +5,7 @@ import wfdb
 from fastapi.testclient import TestClient
 
 from app.main import create_app
-from app.services.ecg import DATA_DIRECTORY
+from app.dataset import DATA_DIRECTORY
 
 
 @pytest.mark.skipif(not (DATA_DIRECTORY / "100.dat").is_file(), reason="Download MIT-BIH record 100 first")

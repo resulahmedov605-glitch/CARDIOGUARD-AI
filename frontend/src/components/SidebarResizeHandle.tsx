@@ -1,5 +1,9 @@
 import { useRef, type KeyboardEvent, type PointerEvent } from 'react'
-import { SIDEBAR_COLLAPSED_WIDTH, SIDEBAR_MAX_WIDTH, SIDEBAR_MIN_WIDTH } from '../hooks/useSidebarWidth'
+import {
+  SIDEBAR_COLLAPSED_WIDTH,
+  SIDEBAR_MAX_WIDTH,
+  SIDEBAR_MIN_WIDTH,
+} from '../hooks/useSidebarWidth'
 
 interface SidebarResizeHandleProps {
   width: number
@@ -11,7 +15,15 @@ interface SidebarResizeHandleProps {
   onToggle: () => void
 }
 
-export function SidebarResizeHandle({ width, collapsed, onPreview, onCommit, onCancel, onReset, onToggle }: SidebarResizeHandleProps) {
+export function SidebarResizeHandle({
+  width,
+  collapsed,
+  onPreview,
+  onCommit,
+  onCancel,
+  onReset,
+  onToggle,
+}: SidebarResizeHandleProps) {
   const drag = useRef<{ pointerId: number; startX: number; startWidth: number } | null>(null)
   const handle = useRef<HTMLDivElement>(null)
 
@@ -36,18 +48,26 @@ export function SidebarResizeHandle({ width, collapsed, onPreview, onCommit, onC
       return
     }
     if (drag.current) return
-    if (event.key === 'Enter'
-      || (event.key === 'ArrowRight' && collapsed)
-      || (event.key === 'ArrowLeft' && width <= SIDEBAR_MIN_WIDTH && !collapsed)) {
+    if (
+      event.key === 'Enter' ||
+      (event.key === 'ArrowRight' && collapsed) ||
+      (event.key === 'ArrowLeft' && width <= SIDEBAR_MIN_WIDTH && !collapsed)
+    ) {
       event.preventDefault()
       onToggle()
       return
     }
     const step = event.shiftKey ? 32 : 8
-    const next = event.key === 'ArrowLeft' ? width - step
-      : event.key === 'ArrowRight' ? width + step
-        : event.key === 'Home' ? SIDEBAR_MIN_WIDTH
-          : event.key === 'End' ? SIDEBAR_MAX_WIDTH : null
+    const next =
+      event.key === 'ArrowLeft'
+        ? width - step
+        : event.key === 'ArrowRight'
+          ? width + step
+          : event.key === 'Home'
+            ? SIDEBAR_MIN_WIDTH
+            : event.key === 'End'
+              ? SIDEBAR_MAX_WIDTH
+              : null
     if (next !== null) {
       event.preventDefault()
       onCommit(next)

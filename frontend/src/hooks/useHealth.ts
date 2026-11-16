@@ -20,14 +20,19 @@ export function useHealth() {
       await getHealth(controller.signal)
       if (activeRequest.current === controller) {
         setStatus('online')
-        if (showFeedback) notify.success('Backend connected', 'The local API is responding.', { id: 'backend-health' })
+        if (showFeedback)
+          notify.success('Backend connected', 'The local API is responding.', {
+            id: 'backend-health',
+          })
       }
     } catch {
       if (activeRequest.current === controller) {
         setStatus('offline')
-        if (showFeedback) notify.error('Backend unavailable', 'Start the local FastAPI server on port 8000.', {
-          id: 'backend-health', action: { label: 'Check again', onClick: () => void checkHealth(true) },
-        })
+        if (showFeedback)
+          notify.error('Backend unavailable', 'Start the local FastAPI server on port 8000.', {
+            id: 'backend-health',
+            action: { label: 'Check again', onClick: () => void checkHealth(true) },
+          })
       }
     } finally {
       window.clearTimeout(timeout)

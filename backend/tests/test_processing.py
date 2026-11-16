@@ -1,7 +1,7 @@
 """Controlled numerical test signals only; not application or patient data."""
 import numpy as np
 import pytest
-from app.processing.ecg import FilterConfig, DetectionConfig, preprocess, detect_peaks, rr_statistics, compare_peaks, normalize
+from app.processing import FilterConfig, DetectionConfig, preprocess, detect_peaks, rr_statistics, compare_peaks, normalize
 
 
 @pytest.mark.parametrize('fs', [250, 360])

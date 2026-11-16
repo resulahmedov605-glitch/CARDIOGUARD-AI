@@ -3,9 +3,9 @@ import argparse
 import json
 import math
 
-from app.schemas.analysis import AnalysisRequest
-from app.services.analysis import analyze
-from app.services.ecg import ECGService
+from app.schemas import AnalysisRequest
+from app.analysis import analyze
+from app.dataset import ECGService
 
 
 def evaluate(full_record: bool = False) -> dict:
