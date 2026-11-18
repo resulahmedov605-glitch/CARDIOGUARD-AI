@@ -65,11 +65,12 @@ def preprocess(values: ArrayLike, fs: float, config: FilterConfig = FilterConfig
     return zero_phase(signal, coefficients)
 
 
-def refine_peak(signal: NDArray[np.float64], peak: int, radius: int) -> int:
-    centered = signal - np.median(signal)
+def refine_peak(signal: NDArray[np.float64], peak: int, radius: int, *, baseline: float | None = None) -> int:
+    if baseline is None:
+        baseline = float(np.median(signal))
     left = max(0, peak - radius)
     right = min(len(signal), peak + radius + 1)
-    return left + int(np.argmax(np.abs(centered[left:right])))
+    return left + int(np.argmax(np.abs(signal[left:right] - baseline)))
 
 
 def detect_peaks(values: ArrayLike, fs: float, config: DetectionConfig = DetectionConfig()) -> NDArray[np.int64]:
@@ -94,10 +95,11 @@ def detect_peaks(values: ArrayLike, fs: float, config: DetectionConfig = Detecti
     distance = math.ceil(config.refractory_seconds * fs)
     candidates, _ = find_peaks(envelope, height=threshold, prominence=threshold * .5, distance=distance)
     radius = max(1, round(config.refinement_seconds * fs))
-    centered = signal - np.median(signal)
+    median = float(np.median(signal))
+    centered = signal - median
     refined = []
     for peak in candidates:
-        refined.append(refine_peak(signal, int(peak), radius))
+        refined.append(refine_peak(signal, int(peak), radius, baseline=median))
     # Refinement can move nearby candidates together. Keep the strongest first.
     selected: list[int] = []
     for peak in sorted(set(refined), key=lambda i: abs(centered[i]), reverse=True):

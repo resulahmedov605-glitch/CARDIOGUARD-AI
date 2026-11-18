@@ -82,6 +82,7 @@ test('classification markers use returned timestamps and independent class contr
   expect(traces()[3].x).toEqual([1.6])
   expect(traces()[3].y).toEqual([-0.7])
   expect(traces()[3].customdata).toEqual([0.9])
+  expect(traces()[3].marker.symbol).toBe('diamond')
   fireEvent.click(screen.getByLabelText('PVC estimates'))
   expect(traces().map((trace: Data) => trace.name)).toEqual([
     'Original ECG',

@@ -4,6 +4,7 @@ import type { ECGSignalResponse } from '../../lib/ecg'
 import type { AnalysisRequest, ECGAnalysis } from '../../lib/analysis'
 import { useApiResource } from '../../hooks/useApiResource'
 import { Icon } from '../../components/Icon'
+import { ClassificationResults } from '../ai/ClassificationResults'
 
 const ECGChart = lazy(() => import('./ECGChart'))
 const numberOrMissing = (value: number | null | undefined, digits = 2) =>
@@ -41,8 +42,9 @@ export function SignalAnalysis({ signal }: { signal: ECGSignalResponse }) {
 
   function run(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    const high = baseline ? Number(highpass) : null
-    const low = noise ? Number(lowpass) : null
+    const includeAI = (event.nativeEvent as SubmitEvent).submitter?.getAttribute('value') === 'ai'
+    const high = includeAI ? 0.5 : baseline ? Number(highpass) : null
+    const low = includeAI ? 40 : noise ? Number(lowpass) : null
     const invalidHigh =
       high !== null && (!highpass.trim() || !Number.isFinite(high) || high < 0.05 || high > 10)
     const invalidLow =
@@ -50,7 +52,7 @@ export function SignalAnalysis({ signal }: { signal: ECGSignalResponse }) {
     const reversedCutoffs = high !== null && low !== null && high >= low
     const exceedsNyquist = low !== null && low >= signal.sampling_frequency_hz / 2
 
-    if (invalidHigh || invalidLow || reversedCutoffs || exceedsNyquist) {
+    if (!includeAI && (invalidHigh || invalidLow || reversedCutoffs || exceedsNyquist)) {
       const message =
         'Choose valid cutoffs: high-pass 0.05–10 Hz, low-pass 10–150 Hz below Nyquist, with high-pass below low-pass.'
       setError(message)
@@ -61,8 +63,26 @@ export function SignalAnalysis({ signal }: { signal: ECGSignalResponse }) {
       channel: signal.channel.index,
       start_seconds: signal.requested_start_seconds,
       duration_seconds: signal.requested_duration_seconds,
-      preprocessing: { highpass_hz: high, lowpass_hz: low, order: Number(order), normalization },
-      detection: { refractory_seconds: Number(refractory), threshold_scale: Number(threshold) },
+      preprocessing: {
+        highpass_hz: high,
+        lowpass_hz: low,
+        order: includeAI ? 3 : Number(order),
+        normalization,
+      },
+      detection: {
+        refractory_seconds: includeAI ? 0.25 : Number(refractory),
+        threshold_scale: includeAI ? 0.35 : Number(threshold),
+      },
+      include_ai: includeAI,
+    }
+    if (includeAI) {
+      setHighpass('0.5')
+      setLowpass('40')
+      setBaseline(true)
+      setNoise(true)
+      setOrder('3')
+      setRefractory('0.25')
+      setThreshold('0.35')
     }
     const next = JSON.stringify(request)
     setError(null)
@@ -149,6 +169,27 @@ export function SignalAnalysis({ signal }: { signal: ECGSignalResponse }) {
             {result.loading ? 'Analyzing…' : 'Run analysis'}
           </button>
         </div>
+        <div className="ecg-ai-action">
+          <button
+            type="submit"
+            value="ai"
+            formNoValidate
+            className="ecg-tool"
+            disabled={
+              result.loading ||
+              signal.channel.name !== 'MLII' ||
+              signal.sampling_frequency_hz !== 360 ||
+              signal.duration_seconds < 0.5
+            }
+          >
+            <Icon name="brain" width={18} height={18} />
+            Analyze with AI
+          </button>
+          <p className="ecg-controls-hint">
+            AI uses MLII at 360 Hz, a 0.5–40 Hz order-3 filter and default peak settings.
+            Educational N/PVC estimates only. Model details are available in AI Lab.
+          </p>
+        </div>
         <details className="ecg-detection-settings">
           <summary>Peak detection settings</summary>
           <div className="ecg-processing-grid">
@@ -210,7 +251,11 @@ export function SignalAnalysis({ signal }: { signal: ECGSignalResponse }) {
           </p>
         }
       >
-        <ECGChart signal={data?.original_signal ?? signal} analysis={data ?? undefined} />
+        <ECGChart
+          signal={data?.original_signal ?? signal}
+          analysis={data ?? undefined}
+          predictions={data?.ai_classification ?? undefined}
+        />
       </Suspense>
       {data && (
         <>
@@ -257,6 +302,12 @@ export function SignalAnalysis({ signal }: { signal: ECGSignalResponse }) {
               <dd>{data.statistics.valid_interval_count}</dd>
             </div>
           </dl>
+          {data.ai_classification && (
+            <>
+              <p className="ecg-analysis-notice">Model {data.ai_classification.model_version}</p>
+              <ClassificationResults data={data.ai_classification} />
+            </>
+          )}
           <details className="ecg-analysis-details">
             <summary>RR intervals and peak timestamps</summary>
             <p>

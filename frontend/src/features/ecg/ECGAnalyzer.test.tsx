@@ -55,12 +55,14 @@ afterEach(() => {
 })
 
 test('loads record selection, metadata, amplitudes and timestamps', async () => {
-  vi.stubGlobal('fetch', mockAPI())
+  const fetcher = mockAPI()
+  vi.stubGlobal('fetch', fetcher)
   render(<ECGAnalyzer />)
   const chart = await screen.findByRole('img', { name: 'Test waveform' })
   expect(chart.textContent).toContain('TEST_A: 0.1,0.2 at 0,0.01')
   expect((screen.getByLabelText('ECG record') as HTMLSelectElement).value).toBe('100')
   expect(screen.getByText('TEST_A, TEST_B')).toBeTruthy()
+  expect(fetcher).toHaveBeenCalledTimes(2)
 })
 
 test('channel changes and interval updates request the selected data', async () => {

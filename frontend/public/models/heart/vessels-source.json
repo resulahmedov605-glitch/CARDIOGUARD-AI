@@ -1,0 +1,50 @@
+{
+  "source": "https://purl.humanatlas.io/ref-organ/blood-vasculature-female/v1.3",
+  "creators": [
+    "Kristen Browne",
+    "Heidi Schlehlein"
+  ],
+  "asset_url": "https://cdn.humanatlas.io/digital-objects/ref-organ/blood-vasculature-female/v1.3/assets/3d-vh-f-blood-vasculature.glb",
+  "license": "CC BY 4.0",
+  "license_url": "https://creativecommons.org/licenses/by/4.0/",
+  "source_sha256": "6bf794b4255c254d03afe254f765c93e7394e4397068268d4eaa3cde50ffdf60",
+  "sha256": {
+    "cardiac-vessels.glb": "7c332315b8dc691189dd12b3a574ea0b8fa8b9add9f197b53eb5f92d41be35f9",
+    "vessels-crosswalk.csv": "8fa4cd47b504323f2a942432bb673e81887ca438dd17ef64a2b915b9898216c7"
+  },
+  "selected_nodes": [
+    "VH_F_pulmonary_vein_L_sup",
+    "VH_F_pulmonary_vein_R_inf",
+    "VH_F_pulmonary_vein_R_sup",
+    "VH_F_pulmonary_vein_L_inf",
+    "VH_F_coronary_sinus",
+    "VH_F_great_cardiac_vein",
+    "VH_F_middle_cardiac_vein",
+    "VH_F_oblique_vein_of_left_atrium",
+    "VH_F_left_marginal_vein",
+    "VH_F_posterior_vein_of_left_ventricle",
+    "VH_F_anterior_cardiac_vein",
+    "VH_F_small_cardiac_vein",
+    "VH_F_superior_vena_cava",
+    "VH_F_inferior_vena_cava_a",
+    "VH_F_left_circumflex_artery",
+    "VH_F_diagonal_branch_of_left_anterior_descending_artery",
+    "VH_F_left_coronary_artery",
+    "VH_F_left_marginal_branch",
+    "VH_F_left_posterior_descending_branch_of_circumflex_branch_of_left_coronary_artery",
+    "VH_F_posterior_left_ventricular_branch",
+    "VH_F_right_coronary_artery",
+    "VH_F_right_marginal_artery",
+    "VH_F_pulmonary_artery_L",
+    "VH_F_pulmonary_trunk",
+    "VH_F_pulmonary_artery_R",
+    "VH_F_aortic_arch",
+    "VH_F_ascending_aorta",
+    "VH_F_descending_aorta_a"
+  ],
+  "changes": "Cardiac mesh subset only. Original coordinates, vertex, normal and index bytes preserved.",
+  "exclusions": {
+    "VH_F_inferior_vena_cava_b": "Distal abdominal segment outside the cardiac view",
+    "VH_F_left_anterior_descending_artery": "Source name conflicts with its FMA:8636 label/identifier; excluded pending source correction"
+  }
+}

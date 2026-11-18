@@ -1,6 +1,7 @@
 """Synthetic WFDB fixtures test software only; real metrics come from the CLI."""
 
 import json
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 import shutil
 
@@ -197,6 +198,102 @@ def test_model_processing_failure_is_an_actionable_503(trained, monkeypatch):
         def predict(self, values):
             raise ValueError('Incompatible estimator')
     monkeypatch.setattr(ml, 'load_model', lambda directory: (BrokenModel(), metadata))
+    with pytest.raises(ECGError) as error:
+        classify(PredictionRequest(record_id='100', duration_seconds=8), service, directory)
+    assert error.value.status_code == 503
+
+
+def test_combined_analysis_reuses_signal_and_preserves_prediction_mapping(trained, monkeypatch):
+    from app.analysis import analyze
+    from app.schemas import AnalysisRequest
+    service, directory, _ = trained
+    calls = 0
+    read_signal = service.signal
+
+    def counted_signal(*args):
+        nonlocal calls
+        calls += 1
+        return read_signal(*args)
+
+    monkeypatch.setattr(service, 'signal', counted_signal)
+    request = AnalysisRequest(record_id='100', duration_seconds=7, start_seconds=.55, include_ai=True)
+    result = analyze(request, service, directory)
+    assert calls == 1
+    prediction = classify(PredictionRequest(record_id='100', duration_seconds=7, start_seconds=.55), service, directory)
+    assert result.ai_classification.model_dump() == {
+        key: value for key, value in prediction.items() if key not in ('original_signal', 'filtered_amplitudes')
+    }
+    assert result.original_signal.model_dump() == prediction['original_signal']
+    assert result.filtered_amplitudes == prediction['filtered_amplitudes']
+    peaks = {peak.record_sample_index: peak for peak in result.detected_peaks}
+    for beat in result.ai_classification.beats:
+        assert beat.record_sample_index in peaks
+        assert beat.timestamp_seconds == peaks[beat.record_sample_index].timestamp_seconds
+        assert beat.filtered_amplitude == peaks[beat.record_sample_index].filtered_amplitude
+    assert result.statistics.peak_count == result.ai_classification.detected_count
+
+
+def test_combined_api_missing_model_and_fixed_configuration(trained, tmp_path):
+    service, directory, _ = trained
+    app = create_app()
+    app.dependency_overrides[get_ecg_service] = lambda: service
+    app.dependency_overrides[get_model_directory] = lambda: directory
+    with TestClient(app) as client:
+        body = {'record_id': '100', 'duration_seconds': 8, 'include_ai': True}
+        assert client.post('/api/v1/ecg/analyze', json=body).status_code == 200
+        for change in ({'preprocessing': {'highpass_hz': 1}}, {'detection': {'threshold_scale': .4}},
+                       {'channel': 1}, {'include_ai': 'true'}, {'duration_seconds': 31}):
+            assert client.post('/api/v1/ecg/analyze', json={**body, **change}).status_code == 422
+        app.dependency_overrides[get_model_directory] = lambda: tmp_path / 'missing'
+        assert client.post('/api/v1/ecg/analyze', json=body).status_code == 503
+        assert client.post('/api/v1/ecg/analyze', json={**body, 'include_ai': False}).status_code == 200
+
+
+def test_cached_model_is_reused_and_changed_files_are_revalidated(trained, tmp_path, monkeypatch):
+    from app import ml
+    _, directory, metadata = trained
+    target = tmp_path / 'models'
+    shutil.copytree(directory, target)
+    calls = 0
+    deserialize = ml.joblib.load
+
+    def counted_load(*args):
+        nonlocal calls
+        calls += 1
+        return deserialize(*args)
+
+    monkeypatch.setattr(ml.joblib, 'load', counted_load)
+    with ThreadPoolExecutor(max_workers=4) as pool:
+        loaded = list(pool.map(lambda _: load_model(target)[0], range(8)))
+    first = loaded[0]
+    assert all(model is first for model in loaded)
+    assert load_model(target)[0] is first
+    assert model_status(target)['available']
+    assert calls == 1
+    folder = target / metadata['version']
+    (folder / 'metadata.json').write_text('{}')
+    assert not model_status(target)['available']
+    (folder / 'metadata.json').write_text(json.dumps(metadata))
+    assert model_status(target)['available']
+    assert calls == 2
+    (folder / 'model.joblib').write_bytes(b'broken after caching')
+    assert not model_status(target)['available']
+    (target / 'current.json').write_text('{broken pointer')
+    assert not model_status(target)['available']
+
+
+@pytest.mark.parametrize('probabilities', [[[float('nan'), 0]], [[.8, .8]], [[-.1, 1.1]], [[1.]], []])
+def test_invalid_estimator_outputs_return_503(trained, monkeypatch, probabilities):
+    from app import ml
+    service, directory, metadata = trained
+
+    class BrokenProbabilities:
+        classes_ = ['N', 'V']
+
+        def predict_proba(self, features):
+            return np.repeat(np.asarray(probabilities), len(features), axis=0) if probabilities else []
+
+    monkeypatch.setattr(ml, 'load_model', lambda directory: (BrokenProbabilities(), metadata))
     with pytest.raises(ECGError) as error:
         classify(PredictionRequest(record_id='100', duration_seconds=8), service, directory)
     assert error.value.status_code == 503

@@ -1,0 +1,20 @@
+{
+  "title": "HuBMAP HRA, Heart Female v1.3",
+  "creators": [
+    "Kristen Browne",
+    "Heidi Schlehlein"
+  ],
+  "source": "https://purl.humanatlas.io/ref-organ/heart-female/v1.3",
+  "asset_url": "https://cdn.humanatlas.io/digital-objects/ref-organ/heart-female/v1.3/assets/3d-vh-f-heart.glb",
+  "crosswalk_url": "https://cdn.humanatlas.io/digital-objects/ref-organ/heart-female/v1.3/assets/crosswalk.csv",
+  "license": "CC BY 4.0",
+  "license_url": "https://creativecommons.org/licenses/by/4.0/",
+  "license_statement": "https://humanatlas.io/assets/content/3d-reference-library-page/data.yaml",
+  "retrieved": "2026-11-17",
+  "changes": "Original GLB and crosswalk preserved byte-for-byte. Runtime framing, lighting and material highlights are display adaptations.",
+  "sha256": {
+    "heart.glb": "98f66e46b149bfc3836592d9404c50290e21d302ec55c98813435e2d9847b1d9",
+    "crosswalk.csv": "a529992b6e444d40fa9e361542fd694d773de429f611276b292133aa30be1cb2"
+  },
+  "selection": "Exact source node name plus source UBERON ontology ID. Four chamber walls are selectable. Great-vessel geometry is absent from this asset."
+}

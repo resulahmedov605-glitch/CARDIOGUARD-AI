@@ -1,4 +1,4 @@
-import { useEffect, useState, type CSSProperties } from 'react'
+import { lazy, Suspense, useEffect, useState, type CSSProperties } from 'react'
 import { Header } from './components/Header'
 import { Icon } from './components/Icon'
 import { Sidebar } from './components/Sidebar'
@@ -11,6 +11,8 @@ import { useHealth } from './hooks/useHealth'
 import { NotificationCenter } from './components/NotificationCenter'
 import { SidebarResizeHandle } from './components/SidebarResizeHandle'
 import { useSidebarWidth } from './hooks/useSidebarWidth'
+
+const HeartExplorer = lazy(() => import('./features/heart/HeartExplorer'))
 
 export default function App() {
   const [section, setSection] = useState(sectionFromHash)
@@ -65,6 +67,10 @@ export default function App() {
             <ECGAnalyzer />
           ) : section === 'ai-lab' ? (
             <AILab />
+          ) : section === 'heart-explorer' ? (
+            <Suspense fallback={<p role="status">Loading Heart Explorer…</p>}>
+              <HeartExplorer />
+            </Suspense>
           ) : (
             <ModulePlaceholder section={section} />
           )}

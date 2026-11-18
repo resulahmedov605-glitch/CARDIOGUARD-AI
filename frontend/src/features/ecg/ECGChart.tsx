@@ -1,9 +1,9 @@
-import { useEffect, useRef, useState } from 'react'
+import { memo, useEffect, useRef, useState } from 'react'
 import Plotly from 'plotly.js'
 import createPlotlyComponent from 'react-plotly.js/factory'
 import type { ECGSignalResponse } from '../../lib/ecg'
 import type { ECGAnalysis } from '../../lib/analysis'
-import type { PredictionResult } from '../../lib/ai'
+import type { ClassificationResult } from '../../lib/ai'
 import type { Data } from 'plotly.js'
 import { useTheme } from '../../hooks/useTheme'
 import { Icon } from '../../components/Icon'
@@ -11,14 +11,14 @@ import { notify } from '../../lib/notifications'
 
 const Plot = createPlotlyComponent(Plotly)
 
-export default function ECGChart({
+export default memo(function ECGChart({
   signal,
   analysis,
   predictions,
 }: {
   signal: ECGSignalResponse
   analysis?: ECGAnalysis
-  predictions?: PredictionResult
+  predictions?: ClassificationResult & { filtered_amplitudes?: number[] }
 }) {
   const { theme } = useTheme()
   const colors =
@@ -83,10 +83,11 @@ export default function ECGChart({
       connectgaps: false,
       hovertemplate: hover,
     })
-  if ((analysis || predictions) && filtered)
+  const filteredAmplitudes = analysis?.filtered_amplitudes ?? predictions?.filtered_amplitudes
+  if (filteredAmplitudes && filtered)
     traces.push({
       x: signal.timestamps_seconds,
-      y: (analysis ?? predictions)!.filtered_amplitudes,
+      y: filteredAmplitudes,
       type: 'scatter',
       mode: 'lines',
       name: 'Filtered ECG',
@@ -132,7 +133,7 @@ export default function ECGChart({
         marker: {
           color: label === 'N' ? colors.normalized : colors.peaks,
           size: 10,
-          symbol: label === 'N' ? 'circle-open' : 'diamond-open',
+          symbol: label === 'N' ? 'circle' : 'diamond',
           line: { width: 2 },
         },
         hovertemplate: `%{x:.4f} s<br>Model estimate: ${label}<br>Probability: %{customdata:.1%}<extra></extra>`,
@@ -314,4 +315,4 @@ export default function ECGChart({
       )}
     </>
   )
-}
+})

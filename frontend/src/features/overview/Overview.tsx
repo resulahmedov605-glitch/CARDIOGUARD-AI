@@ -17,8 +17,8 @@ export function Overview(health: ReturnType<typeof useHealth>) {
         </div>
         <span className="sprint-badge">
           <Icon name="layers" width={16} height={16} className="text-primary" />
-          Phase 01
-          <span className="text-faint">/</span>ECG analysis
+          Phase 02
+          <span className="text-faint">/</span>Interactive anatomy
         </span>
       </div>
 
@@ -84,17 +84,17 @@ export function Overview(health: ReturnType<typeof useHealth>) {
                   <span className="planned-badge">
                     <Icon
                       name={
-                        module.id === 'ecg-analyzer' || module.id === 'ai-lab' ? 'success' : 'clock'
+                        module.id !== 'algorithms-lab' ? 'success' : 'clock'
                       }
                       width={15}
                       height={15}
                       className={
-                        module.id === 'ecg-analyzer' || module.id === 'ai-lab'
+                        module.id !== 'algorithms-lab'
                           ? 'text-success'
                           : 'text-subtle'
                       }
                     />
-                    {module.id === 'ecg-analyzer' || module.id === 'ai-lab'
+                    {module.id !== 'algorithms-lab'
                       ? 'Available'
                       : 'Planned'}
                   </span>

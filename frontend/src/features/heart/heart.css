@@ -1,0 +1,115 @@
+@reference "../../styles.css";
+
+@layer components {
+  .heart-layout {
+    @apply grid grid-cols-[minmax(0,1fr)_300px] items-start gap-5;
+  }
+  .heart-viewer,
+  .heart-panel {
+    @apply min-w-0 overflow-hidden rounded-xl border border-line bg-surface;
+  }
+  .heart-panel {
+    @apply p-6;
+  }
+  .heart-panel h2,
+  .heart-panel-heading h2 {
+    @apply text-[18px] font-semibold tracking-[-0.3px];
+  }
+  .heart-panel-heading {
+    @apply flex flex-wrap items-center justify-between gap-3 border-b border-line-soft px-6 py-5;
+  }
+  .heart-panel-heading p {
+    @apply mt-1 text-[13px] text-muted;
+  }
+  .heart-ready {
+    @apply inline-flex items-center gap-1.5 text-[12px] text-success;
+  }
+  .heart-stage {
+    @apply relative;
+    height: 540px;
+    background: radial-gradient(ellipse at 50% 48%, var(--tint), var(--surface-muted) 70%);
+  }
+  .heart-canvas {
+    @apply absolute inset-0;
+  }
+  .heart-canvas canvas {
+    @apply block h-full w-full outline-none;
+    cursor: grab;
+  }
+  .heart-canvas canvas:active { cursor: grabbing; }
+  .heart-canvas canvas:focus-visible { outline: 3px solid var(--primary); outline-offset: -3px; }
+  .heart-view-message {
+    @apply absolute inset-0 flex flex-col items-center justify-center gap-4 bg-surface-muted px-8 text-center text-[14px] leading-6 text-muted;
+  }
+  .heart-view-message strong { @apply text-[16px] font-semibold text-ink; }
+  .heart-view-message p { @apply max-w-sm; }
+  .heart-toolbar {
+    @apply flex flex-wrap items-center justify-between gap-3 border-t border-line-soft px-5 pt-4;
+  }
+  .heart-toolbar > div { @apply flex gap-2; }
+  .heart-tool {
+    @apply inline-flex min-h-10 min-w-10 items-center justify-center gap-2 rounded-md border border-line bg-surface px-3 text-[13px] font-medium text-muted-strong hover:bg-tint hover:text-primary;
+  }
+  .heart-tool:disabled { @apply cursor-default opacity-40; }
+  .heart-help { @apply px-5 pb-5 pt-3 text-[12px] leading-5 text-muted; }
+  .heart-sidebar { @apply grid gap-5; }
+  .heart-panel-intro { @apply mt-2 text-[13px] leading-5 text-muted; }
+  .heart-structure-list { @apply mt-4 grid max-h-80 gap-2 overflow-y-auto; }
+  .heart-structure-list button {
+    @apply flex min-h-12 items-center gap-3 rounded-lg border border-line-soft px-3 text-left text-[14px] text-muted-strong hover:border-tint-line hover:bg-tint;
+  }
+  .heart-structure-list button > svg:last-child { @apply ml-auto shrink-0; }
+  .heart-structure-list button[aria-pressed='true'] {
+    @apply border-tint-line bg-tint font-semibold text-primary;
+  }
+  .heart-category-buttons { @apply mt-4 flex gap-1 rounded-lg bg-surface-muted p-1; }
+  .heart-category-buttons button { @apply min-h-9 min-w-0 flex-1 rounded-md px-2 text-[12px] font-medium text-muted; }
+  .heart-category-buttons button[aria-pressed='true'] { @apply bg-surface text-primary shadow-sm; }
+  .heart-layer-controls { @apply flex flex-wrap items-center gap-x-5 gap-y-3 border-b border-line-soft bg-surface-muted px-5 py-3 text-[12px] text-muted-strong; }
+  .heart-layer-controls label { @apply inline-flex items-center gap-2; }
+  .heart-layer-controls .heart-tool { @apply ml-auto; }
+  .heart-tooltip { @apply pointer-events-none absolute z-10 w-60 rounded-lg border border-line bg-surface px-4 py-3 shadow-lg; max-width: calc(100% - 24px); }
+  .heart-tooltip strong { @apply block text-[13px] font-semibold text-ink; }
+  .heart-tooltip p { @apply mt-1 text-[12px] leading-5 text-muted-strong; }
+  .heart-tooltip span { @apply mt-1 block text-[11px] text-primary; }
+  .heart-empty-layers { @apply pointer-events-none bg-transparent; }
+  .heart-clear { @apply mt-4 text-[13px] font-medium text-primary underline underline-offset-4; }
+  .heart-section-label { @apply mb-2 block text-[10px] font-semibold tracking-[1.3px] text-primary; }
+  .heart-description h2 { @apply mt-3; }
+  .heart-description h3 { @apply mt-5 text-[13px] font-semibold; }
+  .heart-description p { @apply mt-3 text-[14px] leading-6 text-muted-strong; }
+  .heart-description .heart-pathway { @apply rounded-lg bg-tint p-3 text-[12px] leading-5 text-primary; }
+  .heart-description .heart-orientation { @apply mt-5 border-t border-line-soft pt-4 text-[12px] leading-5 text-muted; }
+  .heart-section-heading { @apply mb-3 flex items-center gap-3 text-primary; }
+  .heart-section-heading h2 { @apply text-ink; }
+  .heart-circulation { @apply mt-5; }
+  .heart-circulation > p { @apply text-[14px] leading-6 text-muted-strong; }
+  .heart-flow { @apply my-5 flex flex-wrap gap-y-3 text-[13px] font-medium text-muted-strong; }
+  .heart-flow li { @apply flex items-center; }
+  .heart-flow li::after { content: '→'; @apply mx-3 text-primary; }
+  .heart-flow li:last-child::after { content: none; }
+  .heart-vessels { @apply border-t border-line-soft pt-4 text-[14px]; }
+  .heart-vessels summary { @apply cursor-pointer font-medium; }
+  .heart-vessels dl { @apply mt-4 grid grid-cols-2 gap-5; }
+  .heart-vessels dt { @apply mb-1 font-semibold; }
+  .heart-vessels dd { @apply text-[13px] leading-6 text-muted-strong; }
+  .heart-circulation .heart-source-note { @apply mt-5 text-[12px] leading-5 text-muted; }
+  .heart-source-link { @apply mt-3 inline-flex items-center gap-2 text-[12px] text-primary hover:underline; }
+  .heart-attribution { @apply mt-5 text-[12px] leading-6 text-muted; }
+  .heart-attribution a { @apply text-primary hover:underline; }
+}
+
+@container workspace (max-width: 1100px) {
+  .heart-layout { grid-template-columns: minmax(0, 1fr); }
+  .heart-sidebar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .heart-stage { height: 500px; }
+}
+@container workspace (max-width: 650px) {
+  .heart-sidebar,
+  .heart-vessels dl { grid-template-columns: minmax(0, 1fr); }
+  .heart-stage { height: 440px; }
+  .heart-panel { padding: 20px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .heart-view-message .animate-spin { animation: none; }
+}

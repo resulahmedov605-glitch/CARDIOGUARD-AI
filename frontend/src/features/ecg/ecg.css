@@ -196,6 +196,15 @@
   .ecg-analysis-title > span {
     @apply text-[13px] text-muted;
   }
+  .ecg-ai-action {
+    @apply mt-4 flex flex-wrap items-center gap-3;
+  }
+  .ecg-ai-action .ecg-controls-hint {
+    @apply min-w-48 flex-1;
+  }
+  .ecg-ai-action button:disabled {
+    @apply cursor-default opacity-60;
+  }
   .ecg-processing-grid {
     @apply grid grid-cols-4 items-end gap-4;
   }

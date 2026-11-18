@@ -1,4 +1,5 @@
 import type { ECGRecordMetadata, ECGSignalResponse } from './ecg'
+import type { ClassificationResult } from './ai'
 
 export interface AnalysisRequest {
   record_id: string
@@ -12,6 +13,7 @@ export interface AnalysisRequest {
     normalization: 'none' | 'zscore'
   }
   detection: { refractory_seconds: number; threshold_scale: number }
+  include_ai?: boolean
 }
 
 export interface ECGAnalysis {
@@ -55,4 +57,5 @@ export interface ECGAnalysis {
     tolerance_seconds: number
   } | null
   warnings: string[]
+  ai_classification?: ClassificationResult | null
 }

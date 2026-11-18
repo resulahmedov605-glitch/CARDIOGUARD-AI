@@ -2,7 +2,9 @@
 
 import hashlib
 import json
+from functools import lru_cache
 from pathlib import Path
+from threading import Lock
 
 import joblib
 import numpy as np
@@ -23,6 +25,7 @@ FEATURE_NAMES = [f"wave_{i}" for i in range(72)] + [
     "early_energy", "qrs_energy", "late_energy",
 ]
 MODEL_DIRECTORY = Path(__file__).resolve().parents[2] / "data" / "models"
+_model_lock = Lock()
 
 
 def get_model_directory() -> Path:
@@ -44,10 +47,14 @@ def validate_splits(splits: dict[str, list[str]]) -> None:
         seen.update(groups)
 
 
-def processed_window(service: ECGService, record_id: str, channel: int, start: float, duration: float):
-    original = service.signal(record_id, channel, start, duration)
+def validate_model_signal(original) -> None:
     if original.channel.name != "MLII" or original.sampling_frequency_hz != FS:
         raise ECGError(422, "This model supports the MLII lead at 360 Hz only.")
+
+
+def processed_window(service: ECGService, record_id: str, channel: int, start: float, duration: float):
+    original = service.signal(record_id, channel, start, duration)
+    validate_model_signal(original)
     try:
         return original, preprocess(original.amplitudes, FS)
     except (ValueError, TypeError, OverflowError) as exc:
@@ -87,29 +94,39 @@ def load_model(directory: Path = MODEL_DIRECTORY):
         artifact, metadata_path = folder / "model.joblib", folder / "metadata.json"
         if folder.is_symlink() or artifact.is_symlink() or metadata_path.is_symlink():
             raise ValueError("Unsafe model path")
-        metadata = json.loads(metadata_path.read_text())
-        if (metadata["feature_version"] != FEATURE_VERSION or metadata["version"] != version
-                or metadata["sklearn_version"] != sklearn.__version__
-                or metadata["supported_classes"] != CLASSES
-                or metadata["feature_names"] != FEATURE_NAMES):
-            raise ValueError("Model feature/class/library version mismatch")
-        validate_splits(metadata["splits"])
-        for split in ("validation", "test"):
-            report = metadata["evaluation"][split]
-            scores = [report[name] for name in ("accuracy", "precision", "recall", "f1")]
-            scores += [report["per_class"][label][name] for label in CLASSES
-                       for name in ("precision", "recall", "f1-score")]
-            if not all(isinstance(score, (int, float)) and np.isfinite(score) and 0 <= score <= 1 for score in scores):
-                raise ValueError("Invalid evaluation metadata")
-        if hashlib.sha256(artifact.read_bytes()).hexdigest() != metadata["artifact_sha256"]:
-            raise ValueError("Model checksum mismatch")
-        model = joblib.load(artifact)
-        if (list(model.classes_) != CLASSES or model.n_features_in_ != len(FEATURE_NAMES)
-                or type(model).__name__ != metadata["algorithm"] or not callable(getattr(model, "predict_proba", None))):
-            raise ValueError("Incompatible fitted model")
-        return model, metadata
+        # Recheck file identity on every request. Replacement or edits invalidate
+        # the cached estimator, including changes to the current version pointer.
+        signature = tuple((stat.st_dev, stat.st_ino, stat.st_size, stat.st_mtime_ns, stat.st_ctime_ns)
+                          for stat in (artifact.stat(), metadata_path.stat()))
+        with _model_lock:
+            return _load_verified_model(artifact, metadata_path, version, signature)
     except Exception as exc:
         raise ECGError(503, "Model unavailable or incompatible. From backend/, run python -m scripts.train_model.") from exc
+
+
+@lru_cache(maxsize=2)
+def _load_verified_model(artifact: Path, metadata_path: Path, version: str, signature: tuple):
+    metadata = json.loads(metadata_path.read_text())
+    if (metadata["feature_version"] != FEATURE_VERSION or metadata["version"] != version
+            or metadata["sklearn_version"] != sklearn.__version__
+            or metadata["supported_classes"] != CLASSES
+            or metadata["feature_names"] != FEATURE_NAMES):
+        raise ValueError("Model feature/class/library version mismatch")
+    validate_splits(metadata["splits"])
+    for split in ("validation", "test"):
+        report = metadata["evaluation"][split]
+        scores = [report[name] for name in ("accuracy", "precision", "recall", "f1")]
+        scores += [report["per_class"][label][name] for label in CLASSES
+                   for name in ("precision", "recall", "f1-score")]
+        if not all(isinstance(score, (int, float)) and np.isfinite(score) and 0 <= score <= 1 for score in scores):
+            raise ValueError("Invalid evaluation metadata")
+    if hashlib.sha256(artifact.read_bytes()).hexdigest() != metadata["artifact_sha256"]:
+        raise ValueError("Model checksum mismatch")
+    model = joblib.load(artifact)
+    if (list(model.classes_) != CLASSES or model.n_features_in_ != len(FEATURE_NAMES)
+            or type(model).__name__ != metadata["algorithm"] or not callable(getattr(model, "predict_proba", None))):
+        raise ValueError("Incompatible fitted model")
+    return model, metadata
 
 
 def model_status(directory: Path = MODEL_DIRECTORY) -> dict:
@@ -125,7 +142,17 @@ def classify(request, service: ECGService, directory: Path = MODEL_DIRECTORY) ->
     model, metadata = load_model(directory)
     original, filtered = processed_window(service, request.record_id, request.channel,
                                            request.start_seconds, request.duration_seconds)
-    peaks = detect_peaks(filtered, FS)
+    try:
+        peaks = detect_peaks(filtered, FS)
+    except (ValueError, TypeError, OverflowError) as exc:
+        raise ECGError(422, str(exc)) from exc
+    result = classify_processed(original, filtered, peaks, model, metadata)
+    return {**result, "original_signal": original.model_dump(), "filtered_amplitudes": filtered.tolist()}
+
+
+def classify_processed(original, filtered: np.ndarray, peaks: np.ndarray, model, metadata: dict) -> dict:
+    """Classify already processed candidates, preserving detector/sample mapping."""
+    validate_model_signal(original)
     features, centers = [], []
     for peak in peaks:
         extracted = beat_features(filtered, int(peak))
@@ -135,8 +162,14 @@ def classify(request, service: ECGService, directory: Path = MODEL_DIRECTORY) ->
     predictions = []
     if features:
         try:
-            labels = model.predict(features)
-            probabilities = model.predict_proba(features)
+            probabilities = np.asarray(model.predict_proba(features), dtype=float)
+            if (probabilities.shape != (len(features), len(CLASSES))
+                    or not np.isfinite(probabilities).all()
+                    or np.any(probabilities < 0) or np.any(probabilities > 1)
+                    or not np.allclose(probabilities.sum(axis=1), 1)):
+                raise ValueError("Invalid model probabilities")
+            # RandomForest.predict uses this same class-probability argmax.
+            labels = np.asarray(model.classes_)[probabilities.argmax(axis=1)]
         except (ValueError, TypeError, AttributeError) as exc:
             raise ECGError(503, "The local model could not process these beats. Rebuild the model artifact.") from exc
         for center, label, probability in zip(centers, labels, probabilities, strict=True):
@@ -148,11 +181,12 @@ def classify(request, service: ECGService, directory: Path = MODEL_DIRECTORY) ->
     total = len(predictions)
     warnings = ["Research model estimates for N/PVC only, not a diagnosis. Other rhythms can be misclassified.",
                 "Classification is conditional on detected QRS candidates. Edge/flat beats are skipped; detector misses are not classified.",
-                "Training/evaluation covers five records only. Reported held-out metrics use annotated beat centers, not end-to-end detector accuracy."]
+                "Training/evaluation covers five records only. Reported held-out metrics use annotated beat centers, not end-to-end detector accuracy.",
+                "Displayed labels are model predictions. Dataset annotations are used separately for detector comparison.",
+                "Probabilities are uncalibrated random-forest estimates for these two classes."]
     if not total:
         warnings.append("No complete usable beats found. Choose a longer interval.")
     return {"model_version": metadata["version"], "supported_classes": CLASSES,
-            "original_signal": original.model_dump(), "filtered_amplitudes": filtered.tolist(),
             "beats": predictions, "counts": counts,
             "proportions": {label: counts[label] / total if total else None for label in CLASSES},
             "detected_count": len(peaks), "skipped_count": len(peaks) - total, "warnings": warnings}

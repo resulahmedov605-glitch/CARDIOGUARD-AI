@@ -11,10 +11,15 @@ from app.ml import classify, get_model_directory, model_status
 from app.schemas import (
     AnalysisRequest, AnalysisResponse, ECGRecordMetadata,
     ECGRecordsResponse, ECGSignalResponse, HealthResponse,
-    ModelStatus, PredictionRequest, PredictionResponse,
+    ErrorResponse, ModelStatus, PredictionRequest, PredictionResponse,
 )
 
-router = APIRouter()
+router = APIRouter(responses={
+    404: {"model": ErrorResponse, "description": "Unknown ECG record"},
+    422: {"model": ErrorResponse, "description": "Invalid parameters or unsupported signal"},
+    503: {"model": ErrorResponse, "description": "Local dataset or model unavailable"},
+    500: {"model": ErrorResponse, "description": "Unexpected local processing failure"},
+})
 Service = Annotated[ECGService, Depends(get_ecg_service)]
 
 
@@ -44,9 +49,11 @@ def get_signal(
     return service.signal(record_id, channel, start_seconds, duration_seconds)
 
 
-@router.post("/ecg/analyze", response_model=AnalysisResponse, tags=["ecg"])
-def analyze_ecg(request: AnalysisRequest, service: Service) -> AnalysisResponse:
-    return analyze(request, service)
+@router.post("/ecg/analyze", response_model=AnalysisResponse, tags=["ecg"],
+             summary="Filter ECG, detect peaks and calculate BPM/RR, optionally classify the same peaks")
+def analyze_ecg(request: AnalysisRequest, service: Service,
+                directory: Annotated[Path, Depends(get_model_directory)]) -> AnalysisResponse:
+    return analyze(request, service, directory)
 
 
 @router.get("/ai/model", response_model=ModelStatus, tags=["ai"])

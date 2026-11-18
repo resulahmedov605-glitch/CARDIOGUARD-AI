@@ -38,6 +38,7 @@ export function ECGAnalyzer() {
   const selectedId = records.some((record) => record.record_id === recordId)
     ? recordId
     : (records[0]?.record_id ?? '')
+  const selectedRecord = records.find((record) => record.record_id === selectedId)
 
   return (
     <>
@@ -101,7 +102,7 @@ export function ECGAnalyzer() {
           </button>
         </section>
       )}
-      {selectedId && <RecordViewer key={selectedId} recordId={selectedId} />}
+      {selectedRecord && <RecordViewer key={selectedId} record={selectedRecord} />}
       <p className="ecg-attribution">
         Source: Moody &amp; Mark, MIT-BIH Arrhythmia Database (2005).{' '}
         <a href="https://physionet.org/content/mitdb/1.0.0/" target="_blank" rel="noreferrer">
@@ -113,10 +114,8 @@ export function ECGAnalyzer() {
   )
 }
 
-function RecordViewer({ recordId }: { recordId: string }) {
-  const metadata = useApiResource<ECGRecordMetadata>(
-    `/api/v1/ecg/records/${encodeURIComponent(recordId)}`,
-  )
+function RecordViewer({ record }: { record: ECGRecordMetadata }) {
+  const recordId = record.record_id
   const [channel, setChannel] = useState(0)
   const [start, setStart] = useState('0')
   const [duration, setDuration] = useState('10')
@@ -128,7 +127,7 @@ function RecordViewer({ recordId }: { recordId: string }) {
     duration_seconds: String(range.duration),
   })
   const signal = useApiResource<ECGSignalResponse>(
-    metadata.data ? `/api/v1/ecg/records/${encodeURIComponent(recordId)}/signal?${params}` : null,
+    `/api/v1/ecg/records/${encodeURIComponent(recordId)}/signal?${params}`,
   )
 
   function applyInterval(event: FormEvent<HTMLFormElement>) {
@@ -143,7 +142,7 @@ function RecordViewer({ recordId }: { recordId: string }) {
       from < 0 ||
       length <= 0 ||
       length > 30 ||
-      from + length > (metadata.data?.duration_seconds ?? 0)
+      from + length > record.duration_seconds
     ) {
       const message =
         'Choose a start of 0 or greater and a duration of up to 30 seconds, within the record.'
@@ -154,11 +153,6 @@ function RecordViewer({ recordId }: { recordId: string }) {
     setRange({ start: from, duration: length })
     if (from === range.start && length === range.duration) signal.retry()
   }
-
-  if (metadata.loading) return <Loading>Reading record metadata…</Loading>
-  if (metadata.error) return <ErrorNotice message={metadata.error} retry={metadata.retry} />
-  if (!metadata.data) return null
-  const record = metadata.data
 
   return (
     <>

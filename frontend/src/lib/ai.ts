@@ -19,11 +19,9 @@ export interface ModelStatus {
   } | null
 }
 
-export interface PredictionResult {
+export interface ClassificationResult {
   model_version: string
   supported_classes: BeatLabel[]
-  original_signal: ECGSignalResponse
-  filtered_amplitudes: number[]
   beats: {
     label: BeatLabel
     record_sample_index: number
@@ -36,4 +34,9 @@ export interface PredictionResult {
   detected_count: number
   skipped_count: number
   warnings: string[]
+}
+
+export interface PredictionResult extends ClassificationResult {
+  original_signal: ECGSignalResponse
+  filtered_amplitudes: number[]
 }

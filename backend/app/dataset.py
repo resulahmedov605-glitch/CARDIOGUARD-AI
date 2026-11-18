@@ -16,7 +16,7 @@ DATA_DIRECTORY = Path(__file__).resolve().parents[2] / "data" / "mitbih"
 # Explicit registry, not filenames supplied by a client. Add reviewed records here.
 KNOWN_RECORDS = {record: (f"{record}.dat",) for record in ("100", "106", "119", "200", "208")}
 MAX_DURATION_SECONDS = 30
-DOWNLOAD_HINT = "Run 'python -m scripts.download_mitbih' from backend/."
+DOWNLOAD_HINT = "Run 'python -m scripts.download_mitbih --record {record_id} --annotations' from backend/."
 
 
 def sample_ceiling(seconds: float, fs: float) -> int:
@@ -52,12 +52,13 @@ class ECGService:
 
     def _header(self, record_id: str) -> wfdb.Record:
         base = self._path(record_id)
+        hint = DOWNLOAD_HINT.format(record_id=record_id)
         for name in (f"{record_id}.hea", *KNOWN_RECORDS[record_id]):
             path = self.data_directory / name
             if path.is_symlink() or path.resolve().parent != self.data_directory:
                 raise ECGError(503, "Dataset files must be regular files inside the data directory.")
             if not path.is_file():
-                raise ECGError(503, f"Local dataset for record {record_id} is missing. {DOWNLOAD_HINT}")
+                raise ECGError(503, f"Local dataset for record {record_id} is missing. {hint}")
         try:
             header = wfdb.rdheader(str(base))
             if not isinstance(header, wfdb.Record):
@@ -82,7 +83,7 @@ class ECGService:
                 raise ValueError("Truncated or inconsistent signal file")
             return header
         except (OSError, ValueError, TypeError, AttributeError, IndexError, OverflowError, HeaderSyntaxError) as exc:
-            raise ECGError(503, f"Local record {record_id} is corrupted or unsupported. {DOWNLOAD_HINT}") from exc
+            raise ECGError(503, f"Local record {record_id} is corrupted or unsupported. {hint}") from exc
 
     def metadata(self, record_id: str) -> ECGRecordMetadata:
         header = self._header(record_id)

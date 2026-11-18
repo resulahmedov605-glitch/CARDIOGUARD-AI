@@ -4,8 +4,8 @@ import { SignalAnalysis } from './SignalAnalysis'
 import { signalFixture, analysisFixture } from './analysis.test-fixtures'
 
 vi.mock('./ECGChart', () => ({
-  default: ({ analysis }: { analysis?: unknown }) => (
-    <div role="img" aria-label={analysis ? 'Analyzed waveform' : 'Original waveform'} />
+  default: ({ analysis, predictions }: { analysis?: unknown; predictions?: unknown }) => (
+    <div role="img" aria-label={predictions ? 'Classified waveform' : analysis ? 'Analyzed waveform' : 'Original waveform'} />
   ),
 }))
 afterEach(() => {
@@ -154,4 +154,51 @@ test('normalization is submitted explicitly and explains its separate units', as
   expect(await screen.findByText(/right-hand axis is dimensionless/)).toBeTruthy()
   const [, options] = fetcher.mock.calls[0] as unknown as [string, RequestInit]
   expect(JSON.parse(options.body as string).preprocessing.normalization).toBe('zscore')
+})
+
+test('combined AI analysis uses model settings and displays returned BPM and classification together', async () => {
+  const classification = {
+    model_version: 'test-model', supported_classes: ['N', 'V'],
+    beats: [{ label: 'V', record_sample_index: 80, timestamp_seconds: 80 / 360,
+      filtered_amplitude: 0.9, probabilities: { N: 0.2, V: 0.8 } }],
+    counts: { N: 0, V: 1 }, proportions: { N: 0, V: 1 }, detected_count: 3,
+    skipped_count: 2, warnings: ['Test research estimates'],
+  }
+  const fetcher = vi.fn(async () => Response.json({ ...analysisFixture, ai_classification: classification }))
+  vi.stubGlobal('fetch', fetcher)
+  render(<SignalAnalysis signal={{ ...signalFixture, channel: { index: 0, name: 'MLII', units: 'mV' }, sampling_frequency_hz: 360 }} />)
+  fireEvent.change(screen.getByLabelText('High-pass (Hz)'), { target: { value: '0.8' } })
+  fireEvent.click(screen.getByRole('button', { name: 'Analyze with AI' }))
+  expect(await screen.findByLabelText('Classification counts')).toBeTruthy()
+  expect(screen.getByLabelText('Estimated heartbeat statistics').textContent).toContain('75.0')
+  expect(screen.getByText('Model test-model')).toBeTruthy()
+  expect(await screen.findByRole('img', { name: 'Classified waveform' })).toBeTruthy()
+  const [, options] = fetcher.mock.calls[0] as unknown as [string, RequestInit]
+  expect(JSON.parse(options.body as string)).toMatchObject({
+    include_ai: true, preprocessing: { highpass_hz: 0.5, lowpass_hz: 40, order: 3 },
+    detection: { refractory_seconds: 0.25, threshold_scale: 0.35 },
+  })
+  expect((screen.getByLabelText('High-pass (Hz)') as HTMLInputElement).value).toBe('0.5')
+  expect(fetcher).toHaveBeenCalledTimes(1)
+})
+
+test('AI request failures retain the original waveform and allow a regular analysis', async () => {
+  const fetcher = vi.fn()
+    .mockResolvedValueOnce(Response.json({ detail: 'Model unavailable' }, { status: 503 }))
+    .mockImplementation(async () => Response.json(analysisFixture))
+  vi.stubGlobal('fetch', fetcher)
+  render(<SignalAnalysis signal={{ ...signalFixture, channel: { index: 0, name: 'MLII', units: 'mV' }, sampling_frequency_hz: 360 }} />)
+  fireEvent.click(screen.getByRole('button', { name: 'Analyze with AI' }))
+  expect((await screen.findByRole('alert')).textContent).toContain('Model unavailable')
+  expect(screen.queryByLabelText('Classification counts')).toBeNull()
+  expect(await screen.findByRole('img', { name: 'Original waveform' })).toBeTruthy()
+  fireEvent.click(screen.getByRole('button', { name: 'Run analysis' }))
+  expect(await screen.findByLabelText('Estimated heartbeat statistics')).toBeTruthy()
+  expect(screen.queryByLabelText('Classification counts')).toBeNull()
+})
+
+test('unsupported leads and sampling rates disable AI classification', () => {
+  render(<SignalAnalysis signal={signalFixture} />)
+  expect(screen.getByRole('button', { name: 'Analyze with AI' }).hasAttribute('disabled')).toBe(true)
+  expect(screen.getByRole('button', { name: 'Run analysis' }).hasAttribute('disabled')).toBe(false)
 })

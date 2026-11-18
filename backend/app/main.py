@@ -1,5 +1,6 @@
 """Application entry point and composition root."""
 
+import logging
 import math
 from typing import Any
 
@@ -10,6 +11,8 @@ from fastapi.responses import JSONResponse
 
 from app.routes import router
 from app.dataset import ECGError
+
+logger = logging.getLogger(__name__)
 
 
 def safe_validation_detail(value: Any) -> Any:
@@ -42,6 +45,13 @@ def create_app() -> FastAPI:
     @application.exception_handler(RequestValidationError)
     async def handle_validation_error(_request: Request, exc: RequestValidationError) -> JSONResponse:
         return JSONResponse(status_code=422, content={"detail": safe_validation_detail(jsonable_encoder(exc.errors()))})
+
+    @application.exception_handler(Exception)
+    async def handle_unexpected_error(_request: Request, exc: Exception) -> JSONResponse:
+        logger.error("Unexpected local API failure", exc_info=exc)
+        return JSONResponse(status_code=500, content={
+            "detail": "The local backend could not complete this request. Check the backend log and retry.",
+        })
 
     return application
 

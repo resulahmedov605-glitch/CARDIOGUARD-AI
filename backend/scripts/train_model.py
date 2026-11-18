@@ -46,12 +46,13 @@ def prepare_dataset(service: ECGService, splits=SPLITS):
                 if duration < .5:
                     raise ValueError("Final window is too short; choose an explicitly reviewed record")
                 original, filtered = processed_window(service, record_id, 0, start, duration)
+                baseline = float(np.median(filtered))
                 selected = (samples >= original.start_sample) & (samples < original.end_sample_exclusive)
                 for sample, symbol in zip(samples[selected], symbols[selected], strict=True):
                     if symbol not in CLASSES:
                         skipped[f"unsupported:{symbol}"] += 1
                         continue
-                    center = refine_peak(filtered, int(sample - original.start_sample), round(.1 * FS))
+                    center = refine_peak(filtered, int(sample - original.start_sample), round(.1 * FS), baseline=baseline)
                     extracted = beat_features(filtered, center)
                     if extracted is None:
                         skipped["boundary_or_flat"] += 1

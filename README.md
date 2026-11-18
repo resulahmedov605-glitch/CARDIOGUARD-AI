@@ -26,6 +26,10 @@ Brauzerdə aç: http://127.0.0.1:5173
 ECG Analyzer bölməsində kanal və vaxt intervalı seç, sonra **Run analysis** bas.
 Normallaşdırma üçün **Normalization → Z-score** seçə bilərsən.
 
+Siqnal, BPM/RR və AI nəticələrini birlikdə görmək üçün **MLII → Analyze with AI** bas.
+Bu düymə modelin sabit filtr və pik ayarlarını tətbiq edir. Adi **Run analysis**
+seçdiyin ayarlarla işləyir. Modelin versiyası və evaluation nəticələri AI Lab-da görünür.
+
 ## İlk quraşdırma
 
 Yalnız dependency-lər və dataset yoxdursa lazımdır. Node.js 24 və Python 3.13 ilə yoxlanıb.
@@ -91,7 +95,7 @@ npm run test:e2e
 - Light/dark görünüş və ölçüsü dəyişən sidebar.
 
 AI Lab artıq real N/PVC model nəticələrini göstərir. AI üçün MLII / 360 Hz istifadə olunur.
-3D Heart Explorer və Algorithms Lab gələcək işlərdir.
+3D Heart Explorer lokal anatomik ürək modeli ilə işləyir. Algorithms Lab növbəti sprint üçündür.
 Plotly üçün build ölçü xəbərdarlığı normaldır; build uğurla tamamlanır.
 
 ## AI modelini hazırlamaq
@@ -111,3 +115,20 @@ Train: 100/106/200, validation: 119, test: 208. Eyni şəxsin döyüntüləri sp
 arasında qarışdırılmır. Yalnız N və V annotasiyaları istifadə olunur.
 Model, metadata və hazırlanmış dataset `data/models/` içində lokal saxlanılır.
 Ətraflı nəticələr: [Sprint 3](docs/sprint-3.md).
+
+MVP inteqrasiyası və son yoxlamalar [Sprint 4](docs/sprint-4.md) hesabatındadır.
+
+## 3D Heart Explorer
+
+Menyudan **3D Heart Explorer** aç. Mouse ilə sürüşdürərək döndər, scroll/pinch ilə
+zoom et. Sağ düymə ilə sürüşdürmək və ya iki barmaq pan edir. **Reset view** ilkin
+görünüşü bərpa edir. Modelə fokus verildikdə ox düymələri döndərir, `+` / `−` zoom,
+`Home` isə reset edir.
+
+Modeldə və ya siyahıda dörd ürək kamerasından birini seçərək onun funksiyasını oxu.
+HRA Heart Female v1.3 modeli, mənbə xəritəsi və CC BY 4.0 lisenziyası
+`frontend/public/models/heart/` içindədir. Aorta və ağciyər arteriyaları məlumat
+bələdçisində izah olunur. 3D seçim dörd kamera divarını əhatə edir.
+
+Model əlavə download və ya API açarı tələb etmir. WebGL olmadıqda məlumat bələdçisi
+işləyir. Mənbə və yoxlama nəticələri [Sprint 5](docs/sprint-5.md) hesabatındadır.

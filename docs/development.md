@@ -7,7 +7,7 @@ Gündəlik iş üçün README-dəki iki serveri başlatmaq kifayətdir.
 | Fayl | İşi |
 | --- | --- |
 | `backend/app/main.py` | FastAPI-ni başladır, xəta cavablarını hazırlayır |
-| `backend/app/routes.py` | Bütün 5 API endpoint-i bir yerdədir |
+| `backend/app/routes.py` | Bütün 7 API endpoint-i bir yerdədir |
 | `backend/app/schemas.py` | API-yə gedən və API-dən gələn məlumat sahələri |
 | `backend/app/dataset.py` | Lokal MIT-BIH fayllarını oxuyur |
 | `backend/app/processing.py` | Filtrasiya, pik aşkarlanması, normallaşdırma və BPM/RR riyaziyyatı |
@@ -45,6 +45,30 @@ Axın sadədir: **sorğu → routes → dataset/analysis → cavab**.
 - `GET /api/v1/ai/model` — modelin hazır olub-olmadığı və real versiyası
 - `POST /api/v1/ai/predict` — seçilmiş interval üçün N/PVC model təxminləri
 
+`POST /api/v1/ecg/analyze` üçün birləşdirilmiş analiz sorğusu aşağıdakı kimidir.
+
+```json
+{
+  "record_id": "208",
+  "channel": 0,
+  "start_seconds": 0.55,
+  "duration_seconds": 10,
+  "include_ai": true
+}
+```
+
+`include_ai` standart olaraq `false` olur. `true` seçildikdə eyni filtrli siqnal və
+piklər həm BPM/RR, həm də `ai_classification` üçün istifadə edilir. AI MLII/360 Hz,
+0.5–40 Hz order-3 filtr və standart detection ayarları tələb edir. Digər ayarlar
+422 qaytarır. Z-score qrafikdə ayrıca göstərilə bilər.
+
+Naməlum record 404, səhv giriş 422, çatışmayan dataset/model 503 qaytarır.
+Gözlənilməz xəta 500 və `detail` mesajı qaytarır, texniki məlumat backend loguna yazılır.
+Model statusu model olmadıqda `available=false` ilə 200 qaytarır.
+Hər signal sorğusu maksimum 30 saniyə, analiz intervalı 0.5–30 saniyədir.
+Frontend sorğuları 15 saniyədən sonra dayandırır və retry göstərir.
+Maşınla oxunan tam API sənədi lokal backend-də `/openapi.json` yolundadır.
+
 Orijinal və filtrli siqnal mV olaraq qalır. Z-score ayrıca, vahidsiz sağ oxda
 verilir. Piklər və BPM filtrli siqnaldan hesablanır. Nəticələr diaqnoz deyil.
 
@@ -52,6 +76,26 @@ AI təlim əmri `backend/scripts/train_model.py`, ekranı isə
 `frontend/src/features/ai/AILab.tsx` içindədir. Feature çıxarılması train və predict
 üçün ortaqdır. Annotasiyalar yalnız təlim/evaluation üçündür; predict onları oxumur.
 Real modelin hazırlanması və ölçüləri [Sprint 3](sprint-3.md) sənədindədir.
+
+## 3D Heart Explorer
+
+`App.tsx` Heart Explorer səhifəsini menyudan açıldıqda lazy yükləyir.
+3D üçün birbaşa Three.js və onun `GLTFLoader` / `OrbitControls` modulları istifadə olunur.
+
+| Fayl | İşi |
+| --- | --- |
+| `frontend/src/features/heart/HeartExplorer.tsx` | Səhifə, kamera seçimi və anatomiya izahları |
+| `frontend/src/features/heart/HeartViewer.tsx` | Loading, xəta, retry və idarəetmə düymələri |
+| `frontend/src/features/heart/heart-scene.ts` | GLB oxunması, işıq, kamera, picking və resursların azad edilməsi |
+| `frontend/src/features/heart/anatomy.ts` | Dörd kameranın mənbə node adı, UBERON ID-si və qısa izahları |
+| `frontend/public/models/heart/` | Lokal model, crosswalk, mənbə hash-ləri və lisenziya |
+
+Mesh adı və UBERON ID birlikdə uyğun gələndə highlight aktiv olur. Modeldə dörd
+kamera divarı seçilir. Render yalnız görünüş, seçim və ölçü dəyişəndə baş verir.
+Səhifədən çıxış fetch-i dayandırır, event/observer-ləri silir və WebGL resurslarını
+azad edir. Retry yeni viewer yaradır.
+
+Model mənbəyi, mövcud geometriyanın əhatəsi və testlər [Sprint 5](sprint-5.md) hesabatındadır.
 
 ## Testlər və köhnə sənədlər
 

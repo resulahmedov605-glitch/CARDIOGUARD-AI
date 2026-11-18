@@ -39,6 +39,8 @@ import {
   WifiOff,
   Workflow,
   X,
+  ZoomIn,
+  ZoomOut,
 } from 'lucide-react'
 import type { LucideProps } from 'lucide-react'
 
@@ -69,6 +71,8 @@ const icons = {
   close: X,
   play: Play,
   zoom: Search,
+  zoomIn: ZoomIn,
+  zoomOut: ZoomOut,
   pan: Hand,
   reset: RotateCcw,
   settings: SlidersHorizontal,

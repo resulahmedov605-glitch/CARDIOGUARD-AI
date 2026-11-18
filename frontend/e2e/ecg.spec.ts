@@ -136,10 +136,10 @@ test('API errors are actionable and retry recovers the real waveform', async ({ 
         body: JSON.stringify({ detail: 'Temporary dataset read failure' }),
       })
     },
-    { times: 1 },
   )
   await page.goto('/#/ecg-analyzer')
   await expect(page.getByRole('alert')).toContainText('Temporary dataset read failure')
+  await page.unroute('**/api/v1/ecg/records/100/signal?**')
   await page.getByRole('button', { name: 'Try again', exact: true }).click()
   await expect(page.locator('.js-plotly-plot')).toBeVisible()
 })
@@ -161,7 +161,7 @@ test('theme and desktop sidebar persist while mobile controls fit', async ({ pag
     .toBe('#1B1820')
   const sidebar = page.locator('#workspace-sidebar')
   const separator = page.getByRole('separator', { name: 'Resize sidebar' })
-  if (testInfo.project.name === 'desktop') {
+  if (testInfo.project.name !== 'mobile') {
     const initial = (await sidebar.boundingBox())!.width
     const handle = (await separator.boundingBox())!
     await page.mouse.move(handle.x + handle.width / 2, handle.y + 100)

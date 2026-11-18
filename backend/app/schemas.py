@@ -9,6 +9,10 @@ class HealthResponse(BaseModel):
     status: Literal["ok"]
 
 
+class ErrorResponse(BaseModel):
+    detail: str | list[dict]
+
+
 class ECGChannel(BaseModel):
     index: int
     name: str
@@ -76,6 +80,10 @@ class AnalysisRequest(StrictParameters):
     preprocessing: PreprocessingParameters = Field(default_factory=PreprocessingParameters)
     detection: DetectionParameters = Field(default_factory=DetectionParameters)
     reference_tolerance_seconds: float = Field(default=.1, ge=.01, le=.2)
+    include_ai: bool = Field(
+        default=False, strict=True,
+        description="Classify the same detected peaks using the model's fixed filter and detector settings.",
+    )
 
 
 class DetectedPeak(BaseModel):
@@ -120,18 +128,6 @@ class NormalizedSignal(BaseModel):
     amplitudes: list[float]
 
 
-class AnalysisResponse(BaseModel):
-    record: ECGRecordMetadata
-    parameters: AnalysisRequest
-    original_signal: ECGSignalResponse
-    filtered_amplitudes: list[float]
-    normalized_signal: NormalizedSignal | None
-    detected_peaks: list[DetectedPeak]
-    statistics: HeartRateStatistics
-    reference_comparison: ReferenceComparison | None
-    warnings: list[str]
-
-
 class PredictionRequest(StrictParameters):
     record_id: str = Field(min_length=1, max_length=16)
     channel: int = Field(default=0, ge=0, strict=True)
@@ -147,17 +143,33 @@ class PredictedBeat(BaseModel):
     probabilities: dict[Literal["N", "V"], float]
 
 
-class PredictionResponse(BaseModel):
+class ClassificationResult(BaseModel):
     model_version: str
     supported_classes: list[Literal["N", "V"]]
-    original_signal: ECGSignalResponse
-    filtered_amplitudes: list[float]
     beats: list[PredictedBeat]
     counts: dict[Literal["N", "V"], int]
     proportions: dict[Literal["N", "V"], float | None]
     detected_count: int
     skipped_count: int
     warnings: list[str]
+
+
+class AnalysisResponse(BaseModel):
+    record: ECGRecordMetadata
+    parameters: AnalysisRequest
+    original_signal: ECGSignalResponse
+    filtered_amplitudes: list[float]
+    normalized_signal: NormalizedSignal | None
+    detected_peaks: list[DetectedPeak]
+    statistics: HeartRateStatistics
+    reference_comparison: ReferenceComparison | None
+    warnings: list[str]
+    ai_classification: ClassificationResult | None = None
+
+
+class PredictionResponse(ClassificationResult):
+    original_signal: ECGSignalResponse
+    filtered_amplitudes: list[float]
 
 
 class ModelStatus(BaseModel):
