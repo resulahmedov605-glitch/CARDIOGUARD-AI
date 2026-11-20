@@ -82,21 +82,8 @@ export function Overview(health: ReturnType<typeof useHealth>) {
                 <p>{module.description}</p>
                 <div className="module-footer">
                   <span className="planned-badge">
-                    <Icon
-                      name={
-                        module.id !== 'algorithms-lab' ? 'success' : 'clock'
-                      }
-                      width={15}
-                      height={15}
-                      className={
-                        module.id !== 'algorithms-lab'
-                          ? 'text-success'
-                          : 'text-subtle'
-                      }
-                    />
-                    {module.id !== 'algorithms-lab'
-                      ? 'Available'
-                      : 'Planned'}
+                    <Icon name="success" width={15} height={15} className="text-success" />
+                    Available
                   </span>
                   <span className="module-category">{module.category}</span>
                 </div>

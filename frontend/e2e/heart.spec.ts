@@ -93,9 +93,9 @@ test('verified chamber buttons highlight geometry and direct picking selects a c
   const box = (await canvas.boundingBox())!
   for (const [x, y] of [[.5, .5], [.6, .55], [.4, .55], [.65, .45], [.45, .45]]) {
     await page.mouse.click(box.x + box.width * x, box.y + box.height * y)
-    if (await page.locator('.heart-chamber-list button[aria-pressed="true"]').count()) break
+    if (await page.locator('.heart-structure-list button[aria-pressed="true"]').count()) break
   }
-  await expect(page.locator('.heart-chamber-list button[aria-pressed="true"]')).toHaveCount(1)
+  await expect(page.locator('.heart-structure-list button[aria-pressed="true"]')).toHaveCount(1)
   await expect(page.getByRole('region', { name: 'Selected structure' })).toContainText('Function')
   await nextFrame(page)
   await canvas.screenshot({ animations: 'disabled', path: testInfo.outputPath('heart-highlight.png') })
@@ -181,7 +181,7 @@ test('mouse and native touch gestures move the model and idle rendering stops', 
     await session.detach()
   }
   await changed(page, canvas, initial)
-  await expect(page.locator('.heart-chamber-list button[aria-pressed="true"]')).toHaveCount(0)
+  await expect(page.locator('.heart-structure-list button[aria-pressed="true"]')).toHaveCount(0)
   const frameCount = () => page.evaluate(() => (window as typeof window & { heartTestFrames: number }).heartTestFrames)
   const idle = await frameCount()
   await page.waitForTimeout(350)

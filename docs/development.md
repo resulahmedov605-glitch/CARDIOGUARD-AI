@@ -7,7 +7,8 @@ Gündəlik iş üçün README-dəki iki serveri başlatmaq kifayətdir.
 | Fayl | İşi |
 | --- | --- |
 | `backend/app/main.py` | FastAPI-ni başladır, xəta cavablarını hazırlayır |
-| `backend/app/routes.py` | Bütün 7 API endpoint-i bir yerdədir |
+| `backend/app/routes.py` | Mövcud 7 ECG/AI/health API endpoint-i |
+| `backend/app/algorithms/` | Laboratoriyanın strukturları, alqoritmləri, metadata və 2 API yolu |
 | `backend/app/schemas.py` | API-yə gedən və API-dən gələn məlumat sahələri |
 | `backend/app/dataset.py` | Lokal MIT-BIH fayllarını oxuyur |
 | `backend/app/processing.py` | Filtrasiya, pik aşkarlanması, normallaşdırma və BPM/RR riyaziyyatı |
@@ -44,6 +45,8 @@ Axın sadədir: **sorğu → routes → dataset/analysis → cavab**.
 - `POST /api/v1/ecg/analyze`
 - `GET /api/v1/ai/model` — modelin hazır olub-olmadığı və real versiyası
 - `POST /api/v1/ai/predict` — seçilmiş interval üçün N/PVC model təxminləri
+- `GET /api/v1/algorithms` — 16 seçim, izahlar, pseudocode və işlək nümunələr
+- `POST /api/v1/algorithms/execute` — girişdən real icra addımlarını və nəticəni yaradır
 
 `POST /api/v1/ecg/analyze` üçün birləşdirilmiş analiz sorğusu aşağıdakı kimidir.
 
@@ -84,18 +87,41 @@ Real modelin hazırlanması və ölçüləri [Sprint 3](sprint-3.md) sənədind�
 
 | Fayl | İşi |
 | --- | --- |
-| `frontend/src/features/heart/HeartExplorer.tsx` | Səhifə, kamera seçimi və anatomiya izahları |
+| `frontend/src/features/heart/HeartExplorer.tsx` | Səhifə, struktur seçimi, qatlar və anatomiya izahları |
 | `frontend/src/features/heart/HeartViewer.tsx` | Loading, xəta, retry və idarəetmə düymələri |
 | `frontend/src/features/heart/heart-scene.ts` | GLB oxunması, işıq, kamera, picking və resursların azad edilməsi |
-| `frontend/src/features/heart/anatomy.ts` | Dörd kameranın mənbə node adı, UBERON ID-si və qısa izahları |
+| `frontend/src/features/heart/anatomy.ts` | Kamera, damar və daxili strukturların mənbə xəritəsi və izahları |
 | `frontend/public/models/heart/` | Lokal model, crosswalk, mənbə hash-ləri və lisenziya |
 
-Mesh adı və UBERON ID birlikdə uyğun gələndə highlight aktiv olur. Modeldə dörd
-kamera divarı seçilir. Render yalnız görünüş, seçim və ölçü dəyişəndə baş verir.
+Struktur seçimi `anatomy.ts` mənbə xəritəsinə əsaslanır. Kamera, damar və daxili
+strukturlar seçilir; hover qısa məlumat göstərir və layer controls daxili görünüşü açır.
+Render yalnız görünüş, seçim və ölçü dəyişəndə baş verir.
 Səhifədən çıxış fetch-i dayandırır, event/observer-ləri silir və WebGL resurslarını
 azad edir. Retry yeni viewer yaradır.
 
 Model mənbəyi, mövcud geometriyanın əhatəsi və testlər [Sprint 5](sprint-5.md) hesabatındadır.
+
+## Algorithms Lab
+
+Axın: **giriş → Pydantic yoxlaması → Python icrası → addımlar → React playback**.
+Backend hər addımın ayrıca surətini saxlayır. Frontend həmin addımları göstərir;
+Pause və Reset yeni hesablama başlatmır. Giriş dəyişəndə növbəti Run yeni sorğu göndərir.
+
+| Fayl | İşi |
+| --- | --- |
+| `backend/app/algorithms/structures.py` | 9 strukturun orijinal implementasiyası |
+| `backend/app/algorithms/execution.py` | 7 alqoritm, struktur əməliyyatları, addım və nəticələr |
+| `backend/app/algorithms/catalog.py` | İzahlar, complexity, əməliyyat formaları və nümunələr |
+| `backend/app/algorithms/schemas.py`, `routes.py` | Pydantic müqaviləsi və 2 endpoint |
+| `frontend/src/features/algorithms/AlgorithmsLab.tsx` | Seçim, giriş formaları, ortaq controls və addımların göstərilməsi |
+| `frontend/src/features/algorithms/AlgorithmVisualization.tsx` | Bar, graph, tree və struktur görünüşləri |
+| `frontend/src/features/algorithms/algorithms.css` | Mövcud dizayna uyğun görünüş |
+| `frontend/src/lib/algorithms.ts` | TypeScript sorğu/cavab tipləri |
+
+Səhv format və uyğun olmayan giriş 422 qaytarır. Boş strukturdan silmək kimi
+əməliyyat xətaları 200 cavabının `steps[].error` və `result.errors` sahələrində
+göstərilir; sonrakı düzgün əməliyyatlar davam edir. İstifadəçi kodu icra edilmir.
+Limitlər və API nümunəsi [Sprint 6](sprint-6.md) hesabatındadır.
 
 ## Testlər və köhnə sənədlər
 

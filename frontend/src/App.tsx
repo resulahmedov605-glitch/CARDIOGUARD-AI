@@ -3,7 +3,6 @@ import { Header } from './components/Header'
 import { Icon } from './components/Icon'
 import { Sidebar } from './components/Sidebar'
 import { navigation, sectionFromHash } from './config/navigation'
-import { ModulePlaceholder } from './features/modules/ModulePlaceholder'
 import { Overview } from './features/overview/Overview'
 import { ECGAnalyzer } from './features/ecg/ECGAnalyzer'
 import { AILab } from './features/ai/AILab'
@@ -13,6 +12,7 @@ import { SidebarResizeHandle } from './components/SidebarResizeHandle'
 import { useSidebarWidth } from './hooks/useSidebarWidth'
 
 const HeartExplorer = lazy(() => import('./features/heart/HeartExplorer'))
+const AlgorithmsLab = lazy(() => import('./features/algorithms/AlgorithmsLab'))
 
 export default function App() {
   const [section, setSection] = useState(sectionFromHash)
@@ -72,7 +72,9 @@ export default function App() {
               <HeartExplorer />
             </Suspense>
           ) : (
-            <ModulePlaceholder section={section} />
+            <Suspense fallback={<p role="status">Loading Algorithms Lab…</p>}>
+              <AlgorithmsLab />
+            </Suspense>
           )}
         </main>
         <footer className="app-footer">

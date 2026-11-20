@@ -10,6 +10,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
 from app.routes import router
+from app.algorithms.routes import router as algorithms_router
 from app.dataset import ECGError
 
 logger = logging.getLogger(__name__)
@@ -37,6 +38,7 @@ def create_app() -> FastAPI:
         redoc_url=None,
     )
     application.include_router(router, prefix="/api/v1")
+    application.include_router(algorithms_router, prefix="/api/v1")
 
     @application.exception_handler(ECGError)
     async def handle_ecg_error(_request: Request, exc: ECGError) -> JSONResponse:

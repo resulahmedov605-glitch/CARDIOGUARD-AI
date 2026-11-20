@@ -95,8 +95,9 @@ npm run test:e2e
 - Light/dark görünüş və ölçüsü dəyişən sidebar.
 
 AI Lab artıq real N/PVC model nəticələrini göstərir. AI üçün MLII / 360 Hz istifadə olunur.
-3D Heart Explorer lokal anatomik ürək modeli ilə işləyir. Algorithms Lab növbəti sprint üçündür.
-Plotly üçün build ölçü xəbərdarlığı normaldır; build uğurla tamamlanır.
+3D Heart Explorer lokal anatomik ürək modeli ilə işləyir. Algorithms Lab 9 məlumat
+strukturunu və 7 alqoritmi real Python icra addımları ilə göstərir.
+Plotly və Three.js üçün build ölçü xəbərdarlığı var; build uğurla tamamlanır.
 
 ## AI modelini hazırlamaq
 
@@ -125,10 +126,22 @@ zoom et. Sağ düymə ilə sürüşdürmək və ya iki barmaq pan edir. **Reset 
 görünüşü bərpa edir. Modelə fokus verildikdə ox düymələri döndərir, `+` / `−` zoom,
 `Home` isə reset edir.
 
-Modeldə və ya siyahıda dörd ürək kamerasından birini seçərək onun funksiyasını oxu.
-HRA Heart Female v1.3 modeli, mənbə xəritəsi və CC BY 4.0 lisenziyası
-`frontend/public/models/heart/` içindədir. Aorta və ağciyər arteriyaları məlumat
-bələdçisində izah olunur. 3D seçim dörd kamera divarını əhatə edir.
+Modeldə və ya siyahıda kamera, damar və daxili strukturları seçərək onların
+funksiyasını oxu. Hover qısa məlumat göstərir, **View inside** daxili strukturları
+açır. HRA Heart və Blood Vasculature Female v1.3 modelləri, mənbə xəritələri və
+CC BY 4.0 lisenziyası `frontend/public/models/heart/` içindədir.
 
 Model əlavə download və ya API açarı tələb etmir. WebGL olmadıqda məlumat bələdçisi
 işləyir. Mənbə və yoxlama nəticələri [Sprint 5](docs/sprint-5.md) hesabatındadır.
+
+## Algorithms Lab
+
+Menyudan **Algorithms Lab** aç. Kateqoriya və alqoritm seç, giriş məlumatlarını
+dəyiş və **Run** bas. **Pause**, **Step Forward** və **Reset** ilə addımları izlə;
+sürət 0.5x–4x aralığındadır. Struktur nümayişlərində əməliyyatları **Add operation**
+ilə növbəyə əlavə edə bilərsən.
+
+Bubble Sort və Merge Sort üçün **Compare** seçimi eyni girişi yan-yana göstərir.
+Binary Search sıralanmış giriş tələb edir. Dijkstra mənfi çəkiləri qəbul etmir.
+Bu laboratoriya tədris üçündür. Yeni dependency, dataset və ya API açarı tələb etmir.
+API, fayllar, limitlər və yoxlamalar: [Sprint 6](docs/sprint-6.md).

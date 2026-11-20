@@ -1,0 +1,109 @@
+@reference "../../styles.css";
+
+@layer components {
+  .lab-selectors { @apply mb-5 grid grid-cols-2 gap-5 rounded-xl border border-line bg-surface p-5; }
+  .lab-selectors label, .lab-inputs label, .lab-controls label { @apply flex min-w-0 flex-col gap-2 text-[13px] font-medium text-muted-strong; }
+  .lab-selectors select, .lab-inputs input, .lab-inputs select, .lab-inputs textarea, .lab-controls select { @apply min-h-10 w-full rounded-lg border border-line bg-surface px-3 text-[14px] text-ink; }
+  .lab-inputs textarea { @apply py-3 font-mono text-[13px]; resize: vertical; }
+  .lab-introduction { @apply mb-5 rounded-xl border border-line bg-surface p-6; }
+  .lab-introduction h2, .lab-panel h2 { @apply text-[18px] font-semibold; }
+  .lab-introduction p, .lab-education > p { @apply mt-2 text-[14px] leading-6 text-muted-strong; }
+  .lab-complexities { @apply mt-4 flex flex-wrap gap-x-7 gap-y-2 text-[13px] text-muted-strong; }
+  .lab-complexities strong { @apply mr-2 text-ink; }
+  .lab-layout { @apply grid grid-cols-[280px_minmax(0,1fr)] items-start gap-5; }
+  .lab-panel { @apply min-w-0 overflow-hidden rounded-xl border border-line bg-surface; }
+  .lab-inputs { @apply grid gap-4 p-5; }
+  .lab-values-input { @apply grid gap-2; }
+  .lab-inputs .lab-check { @apply flex-row items-center leading-5; }
+  .lab-inputs .lab-check input { @apply size-4 min-h-0 w-4 shrink-0; }
+  .lab-operation-fields { @apply grid grid-cols-2 gap-3; }
+  .lab-operation-fields label { text-transform: capitalize; }
+  .lab-operation-list { @apply grid max-h-60 gap-2 overflow-auto text-[11px]; }
+  .lab-operation-list li { @apply flex items-start gap-2 rounded-md bg-surface-muted p-2; }
+  .lab-operation-list code { @apply min-w-0 flex-1 break-all; }
+  .lab-operation-list button { @apply px-2 text-[17px] text-danger; }
+  .lab-hint, .lab-footnote { @apply text-[12px] font-normal leading-5 text-muted; }
+  .lab-footnote { @apply mt-5; }
+  .lab-button { @apply inline-flex min-h-10 items-center justify-center rounded-md border border-line bg-surface px-3 text-[13px] font-medium text-muted-strong hover:bg-tint; }
+  .lab-button:disabled, .lab-controls .primary-button:disabled { @apply cursor-default opacity-40; }
+  .lab-controls { @apply flex flex-wrap items-end gap-2 rounded-xl border border-line bg-surface p-4; }
+  .lab-controls .primary-button { @apply min-h-10 px-4 py-2 text-[13px]; }
+  .lab-controls label { @apply ml-auto; }
+  .lab-controls select { @apply min-w-20; }
+  .lab-empty { @apply flex min-h-48 items-center justify-center rounded-xl border border-dashed border-line bg-surface-muted px-6 py-8 text-center text-[14px] leading-6 text-muted; }
+  .lab-workspace { @apply grid min-w-0 gap-4; }
+  .lab-playback-status { @apply px-1 text-[13px] text-muted-strong; }
+  .lab-run-grid { @apply grid min-w-0 gap-4; }
+  .lab-run-grid.comparing { @apply grid-cols-2; }
+  .lab-run-heading { @apply flex flex-wrap items-center justify-between gap-2 border-b border-line-soft px-5 py-4; }
+  .lab-run-heading > span { @apply text-[11px] text-muted; }
+  .lab-current-step { @apply border-y border-line-soft bg-surface-muted px-5 py-4 text-[13px] leading-6; }
+  .lab-bars { @apply flex min-h-56 gap-2 overflow-x-auto px-5 pb-4 pt-6; }
+  .lab-bar-cell { @apply min-w-6 flex-1 text-center text-[12px] text-muted-strong; max-width: 72px; }
+  .lab-bar-track { @apply relative; height: 192px; border-bottom: 1px solid var(--line); }
+  .lab-bar-track::after { content: ''; position: absolute; top: 50%; left: 0; right: 0; border-top: 1px solid var(--line); }
+  .lab-bar { @apply absolute inset-x-0 rounded-t-sm bg-line; bottom: 50%; }
+  .lab-bar.negative { @apply rounded-b-sm rounded-t-none; top: 50%; bottom: auto; }
+  .lab-bar-track > span { @apply absolute inset-x-0 top-0 font-mono font-semibold; }
+  .lab-bar-cell > small { @apply mt-2 block text-[10px] text-muted; }
+  .lab-bar-cell.active .lab-bar { @apply bg-primary; }
+  .lab-bar-cell.completed .lab-bar { @apply bg-success; }
+  .lab-bar-cell.outside { opacity: .35; }
+  .lab-cells { @apply flex flex-wrap items-start gap-3 px-5 py-7; }
+  .lab-cell { @apply relative flex min-h-20 min-w-16 flex-col items-center justify-center rounded-lg border border-tint-line bg-tint px-3 py-2; }
+  .lab-cell > span, .lab-cell > small { @apply text-[10px] text-muted; }
+  .lab-cell > strong { @apply my-1 font-mono text-[20px] font-medium text-primary; }
+  .lab-stack { @apply mx-auto max-w-44 flex-col items-stretch; }
+  .lab-links { @apply gap-x-7; }
+  .lab-links .lab-cell:not(:last-child)::after { content: '→'; @apply absolute text-primary; right: -22px; }
+  .lab-buckets { @apply grid gap-3 px-5 py-6; }
+  .lab-buckets > div { @apply flex items-center gap-4 text-[12px]; }
+  .lab-buckets > div > span { @apply min-w-16 text-muted; }
+  .lab-buckets ol { @apply flex flex-wrap gap-2; }
+  .lab-buckets li { @apply rounded-md border border-line px-3 py-2; }
+  .lab-buckets strong { @apply ml-2 font-mono text-primary; }
+  .lab-muted { @apply text-muted; }
+  .lab-graph-scroll { @apply max-h-96 overflow-auto p-3; }
+  .lab-graph-scroll svg { @apply block w-full text-muted; }
+  .lab-edge line, .lab-edge path { stroke: var(--line); stroke-width: 2; }
+  .lab-path-edge line, .lab-path-edge path { stroke: var(--primary); stroke-width: 3; }
+  .lab-edge text, .lab-path-edge text { fill: var(--muted-strong); font-size: 12px; paint-order: stroke; stroke: var(--surface); stroke-width: 5px; }
+  .lab-node circle { fill: var(--surface); stroke: var(--line); stroke-width: 2; }
+  .lab-node.current circle { fill: var(--tint); stroke: var(--primary); stroke-width: 3; }
+  .lab-node.visited circle { fill: var(--tint); stroke: var(--success); }
+  .lab-node text { fill: var(--ink); text-anchor: middle; font-size: 13px; font-family: var(--font-sans); }
+  .lab-chart-note { @apply px-5 py-3 text-[12px] leading-5 text-muted; }
+  .lab-distances, .lab-metrics { @apply flex flex-wrap gap-4 border-t border-line-soft px-5 py-3 text-[12px]; }
+  .lab-distances dt, .lab-metrics dt { @apply text-muted; }
+  .lab-distances dd, .lab-metrics dd { @apply mt-1 font-mono font-semibold; }
+  .lab-pseudocode { @apply px-5 py-4; }
+  .lab-pseudocode h3 { @apply mb-3 text-[13px] font-semibold; }
+  .lab-pseudocode ol { @apply list-inside list-decimal space-y-1 text-[12px] leading-6 text-muted-strong; }
+  .lab-pseudocode li { @apply rounded-md px-2 py-1; overflow-wrap: anywhere; }
+  .lab-pseudocode li[aria-current='step'] { @apply bg-tint font-semibold text-primary; }
+  .lab-details { @apply border-t border-line-soft px-5 py-4 text-[13px]; }
+  .lab-details summary { @apply cursor-pointer font-medium; }
+  .lab-log, .lab-result { @apply mt-3 max-h-64 space-y-2 overflow-auto text-[12px] leading-6 text-muted-strong; }
+  .lab-result { @apply whitespace-pre-wrap break-all rounded-lg bg-surface-muted p-3 font-mono; }
+  .lab-error { @apply flex flex-wrap items-center gap-4 rounded-lg border border-danger-line bg-danger-soft p-5 text-[14px] text-danger; }
+  .lab-validation { @apply text-[13px] text-danger; }
+  .lab-education { @apply mt-5 p-6; }
+  .lab-education dl { @apply mt-5 grid grid-cols-2 gap-5 text-[13px] leading-6; }
+  .lab-education dt { @apply font-semibold text-ink; }
+  .lab-education dd { @apply mt-1 text-muted-strong; }
+  .lab-education table { @apply mt-5 w-full text-left text-[13px]; }
+  .lab-education th, .lab-education td { @apply border-b border-line-soft px-3 py-2; }
+  .lab-education caption { @apply mb-2 text-left font-semibold; }
+}
+@container workspace (max-width: 1100px) {
+  .lab-layout { grid-template-columns: minmax(0, 1fr); }
+  .lab-inputs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .lab-inputs > h2, .lab-inputs > .lab-operation-list, .lab-inputs > .lab-operation-fields, .lab-inputs > .lab-check, .lab-inputs > .lab-hint, .lab-inputs > .lab-validation { grid-column: 1 / -1; }
+}
+@container workspace (max-width: 700px) {
+  .lab-run-grid.comparing, .lab-education dl, .lab-selectors { grid-template-columns: minmax(0, 1fr); }
+  .lab-controls label { margin-left: 0; }
+}
+/* Override the shared surface transition for actual array value changes. */
+#root .lab-bar { transition: height 150ms ease, background-color 150ms ease; }
+@media (prefers-reduced-motion: reduce) { #root .lab-bar { transition: none; } }
